@@ -46,7 +46,7 @@ public class RA5toCSV {
             }
 
         } catch (ParseException e) {
-            formatter.printHelp("cupToOgnTask", options);
+            formatter.printHelp("ra5toCsv", options);
             exit(1);
         }
 
