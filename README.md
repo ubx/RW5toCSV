@@ -1,2 +1,2 @@
 # RW5toCSV
-Conver 
+Convert same RW5 data to a CSV and a optional text file
