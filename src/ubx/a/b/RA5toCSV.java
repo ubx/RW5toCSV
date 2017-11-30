@@ -20,7 +20,7 @@ public class RA5toCSV {
 
     private static String rw5file, csvfile, txtfile;
 
-    private enum Mode {GS, HSDV}
+    private enum Mode {GS, HSDV, DT, TM}
 
 
     public static void main(String args[]) throws IOException {
