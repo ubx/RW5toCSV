@@ -1,7 +1,5 @@
 package ubx.a.b;
 
-import ubx.a.b.Rrec;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +12,7 @@ public class ProcessData {
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
         List<String> csvRecs = new ArrayList<String>();
         List<Vrec> vRecs = new ArrayList<Vrec>();
+        Vrec vrecLast = null;
         int cnt = 1;
         for (Rrec rrec : rRecs) {
             Vrec vrec = new Vrec();
@@ -31,9 +30,11 @@ public class ProcessData {
             // --TM00:04:50
             vrec.date = rrec.dt.substring(4);
             vrec.time = rrec.tm.substring(4);
-
-
+            if (vrecLast != null) {
+                System.out.println("dist" + cnt + "=" + distance(vrecLast, vrec));
+            }
             vRecs.add(vrec);
+            vrecLast = vrec;
 
             // todo:
             //   loop over vRecs
@@ -57,6 +58,24 @@ public class ProcessData {
 
     private static String f3(float val) {
         return form3.format(val);
+    }
+
+    private static double distance(Vrec v0, Vrec v1) {
+        return Math.sqrt(Math.pow(v0.easting - v1.easting, 2) + Math.pow(v0.northing - v1.northing, 2));
+
+    }
+
+    private static double distance(double e0, double e1, double n0, double n1) {
+        return Math.sqrt(Math.pow(e1 - e0, 2) + Math.pow(n1 - n0, 2));
+
+    }
+
+    private static double average(double... vals) {
+        double sum = 0.0;
+        for (double val : vals) {
+            sum = sum + val;
+        }
+        return sum / vals.length;
     }
 
 

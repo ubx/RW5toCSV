@@ -64,7 +64,6 @@ public class RA5toCSV {
             switch (mode) {
                 case GS:
                     if (line.startsWith("--GS,")) {
-                        System.out.println("GS>>>" + line);
                         lastRrec = new Rrec();
                         lastRrec.gs = line;
                         mode = Mode.HSDV;
@@ -72,7 +71,6 @@ public class RA5toCSV {
                     }
                 case HSDV:
                     if (line.startsWith("--HSDV:")) {
-                        System.out.println("HSDV>>>" + line);
                         if (lastRrec == null) {
                             lastRrec = new Rrec();
                         }
@@ -82,7 +80,6 @@ public class RA5toCSV {
                     }
                 case DT:
                     if (line.startsWith("--DT")) {
-                        System.out.println("DT>>>" + line);
                         if (lastRrec == null) {
                             lastRrec = new Rrec();
                         }
@@ -93,7 +90,6 @@ public class RA5toCSV {
 
                 case TM:
                     if (line.startsWith("--TM")) {
-                        System.out.println("TM>>>" + line);
                         if (lastRrec == null) {
                             lastRrec = new Rrec();
                         }
