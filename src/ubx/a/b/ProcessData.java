@@ -22,14 +22,11 @@ public class ProcessData {
             vrec.easting = Double.valueOf(strs[2].split(" ")[1]);
             vrec.northing = Double.valueOf(strs[3].split(" ")[1]);
             vrec.elevation = Float.valueOf(strs[4].substring(2));
-
-
             // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
             vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
             vrec.pdop = Float.valueOf(strs[7].split(":")[1]);
-
             // --DT10-01-2015
             // --TM00:04:50
             vrec.date = rrec.dt.substring(4);
