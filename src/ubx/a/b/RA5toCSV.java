@@ -53,7 +53,7 @@ public class RA5toCSV {
         Scanner scanner = new Scanner(new File(rw5file));
         Mode mode = Mode.GS;
 
-        String lastGS = null;
+        Rrec lastRrec = null;
         List<Rrec> rrecs = new ArrayList<Rrec>();
 
         // Reading each line of file using Scanner class
@@ -65,15 +65,42 @@ public class RA5toCSV {
                 case GS:
                     if (line.startsWith("--GS,")) {
                         System.out.println("GS>>>" + line);
-                        lastGS = line;
+                        lastRrec = new Rrec();
+                        lastRrec.gs = line;
                         mode = Mode.HSDV;
+                        break;
                     }
                 case HSDV:
                     if (line.startsWith("--HSDV:")) {
                         System.out.println("HSDV>>>" + line);
-                        rrecs.add(new Rrec(lastGS,line));
-                        lastGS = null;
+                        if (lastRrec == null) {
+                            lastRrec = new Rrec();
+                        }
+                        lastRrec.hsdv = line;
+                        mode = Mode.DT;
+                        break;
+                    }
+                case DT:
+                    if (line.startsWith("--DT")) {
+                        System.out.println("DT>>>" + line);
+                        if (lastRrec == null) {
+                            lastRrec = new Rrec();
+                        }
+                        lastRrec.dt = line;
+                        mode = Mode.TM;
+                        break;
+                    }
+
+                case TM:
+                    if (line.startsWith("--TM")) {
+                        System.out.println("TM>>>" + line);
+                        if (lastRrec == null) {
+                            lastRrec = new Rrec();
+                        }
+                        lastRrec.tm = line;
                         mode = Mode.GS;
+                        rrecs.add(lastRrec);
+                        break;
                     }
             }
         }

@@ -4,9 +4,6 @@ public class Rrec {
 
 
     protected String gs,hsdv;
+    protected String dt, tm;
 
-    public Rrec(String gs, String hsdv) {
-        this.gs = gs;
-        this.hsdv = hsdv;
-    }
 }

@@ -2,15 +2,19 @@ package ubx.a.b;
 
 import ubx.a.b.Rrec;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessData {
 
+    private static final DecimalFormat form3 = new DecimalFormat("0.000");
+
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
         List<String> csvRecs = new ArrayList<String>();
         List<Vrec> vRecs = new ArrayList<Vrec>();
+        int cnt = 1;
         for (Rrec rrec : rRecs) {
             Vrec vrec = new Vrec();
             String strs[] = rrec.gs.split(",");
@@ -20,12 +24,16 @@ public class ProcessData {
             vrec.elevation = Float.valueOf(strs[4].substring(2));
 
 
-         // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
+            // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
             vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
             vrec.pdop = Float.valueOf(strs[7].split(":")[1]);
-            // todo -- add date and time
+
+            // --DT10-01-2015
+            // --TM00:04:50
+            vrec.date = rrec.dt.substring(4);
+            vrec.time = rrec.tm.substring(4);
 
 
             vRecs.add(vrec);
@@ -39,12 +47,20 @@ public class ProcessData {
             //   create a new csvRecs aand return it
 
 
-
-            csvRecs.add(rrec.gs + "," + rrec.hsdv);
+            csvRecs.add("GCP" + cnt++ + "," + f3(vrec.easting) + "," + f3(vrec.northing) + "," + f3(vrec.elevation)
+                    + "," + f3(vrec.hsdv) + "," + f3(vrec.vsdv));
         }
-
-
         return csvRecs;
     }
+
+
+    private static String f3(double val) {
+        return form3.format(val);
+    }
+
+    private static String f3(float val) {
+        return form3.format(val);
+    }
+
 
 }
