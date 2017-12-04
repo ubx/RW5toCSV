@@ -2,7 +2,7 @@ package ch.luethi.rw5tocsv;
 
 public class Vrec {
 
-    protected enum State {VALID, HSDVorVSDVnotInRange}
+    protected enum State {Valid, HSDVorVSDVnotInRange, FloatingFormatError, RW5FormatError}
 
     // these values goes into CSV file
     protected String gcp;

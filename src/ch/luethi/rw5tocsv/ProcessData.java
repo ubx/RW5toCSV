@@ -18,7 +18,7 @@ public class ProcessData {
         int cnt = 1;
         for (Rrec rrec : rRecs) {
             Vrec vrec = getVrec(rrec);
-            if (vrec.state == Vrec.State.VALID) {
+            if (vrec.state == Vrec.State.Valid) {
                 if (vrecLast == null) {
                     vRecs.add(vrec);
                 } else {
@@ -41,7 +41,7 @@ public class ProcessData {
 
         for (Vrec vrec : vRecs) {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
-                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.VALID ? "" : " ***"));
+                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " ***"));
         }
         return csvRecs;
     }
@@ -54,7 +54,7 @@ public class ProcessData {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
-                    + " / " + vrec.date + " " + vrec.time +  (vrec.state == Vrec.State.VALID ? "" : "  " + vrec.state.toString()));
+                    + " / " + vrec.date + " " + vrec.time +  (vrec.state == Vrec.State.Valid ? "" : "  " + vrec.state.toString()));
         }
         return csvRecs;
     }
@@ -64,20 +64,26 @@ public class ProcessData {
         Vrec vrec = new Vrec();
         String strs[] = rrec.gs.split(",");
         // --GS,PN1,N 1200261.6916,E 2608973.7195,EL583.6008,--
-        vrec.easting = Double.valueOf(strs[2].split(" ")[1]);
-        vrec.northing = Double.valueOf(strs[3].split(" ")[1]);
-        vrec.elevation = Float.valueOf(strs[4].substring(2));
-        // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
-        strs = rrec.hsdv.split(",");
-        vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
-        vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
-        vrec.pdop = Float.valueOf(strs[7].split(":")[1]);
-        // --DT10-01-2015
-        // --TM00:04:50
-        vrec.date = rrec.dt.substring(4);
-        vrec.time = rrec.tm.substring(4);
-        // valid ?
-        vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.VALID : Vrec.State.HSDVorVSDVnotInRange;
+        try {
+            vrec.easting = Double.valueOf(strs[2].split(" ")[1]);
+            vrec.northing = Double.valueOf(strs[3].split(" ")[1]);
+            vrec.elevation = Float.valueOf(strs[4].substring(2));
+            // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
+            strs = rrec.hsdv.split(",");
+            vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
+            vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
+            vrec.pdop = Float.valueOf(strs[7].split(":")[1]);
+            // --DT10-01-2015
+            // --TM00:04:50
+            vrec.date = rrec.dt.substring(4);
+            vrec.time = rrec.tm.substring(4);
+            // valid ?
+            vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
+        } catch (NumberFormatException ex) {
+            vrec.state = Vrec.State.FloatingFormatError;
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            vrec.state = Vrec.State.RW5FormatError;
+        }
         return vrec;
     }
 
@@ -96,7 +102,7 @@ public class ProcessData {
     }
 
     private static void average(Vrec vrec, List<Vrec> vRecsShort) {
-        if (vrec.state != Vrec.State.VALID) return;
+        if (vrec.state != Vrec.State.Valid) return;
         vrec.numberOfMeasurements = 1 + vRecsShort.size();
         vrec.pdopMax = vrec.pdop;
         vrec.pdopMin = vrec.pdop;

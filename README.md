@@ -8,5 +8,6 @@ usage: ra5toCsv
 ``````
 
 ToDo
+* more robust RW5 parsing
 * validate results
 * write some test cases
