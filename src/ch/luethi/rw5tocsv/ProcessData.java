@@ -11,9 +11,9 @@ public class ProcessData {
     private static List<Vrec> vRecs = null;
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
-        List<String> csvRecs = new ArrayList<String>();
-        vRecs = new ArrayList<Vrec>();
-        List<Vrec> vRecsShort = new ArrayList<Vrec>();
+        List<String> csvRecs = new ArrayList<>();
+        vRecs = new ArrayList<>();
+        List<Vrec> vRecsShort = new ArrayList<>();
         Vrec vrecLast = null;
         int cnt = 1;
         for (Rrec rrec : rRecs) {
@@ -48,7 +48,7 @@ public class ProcessData {
 
 
     public static List<String> getCSVRecsWithComment() {
-        List<String> csvRecs = new ArrayList<String>();
+        List<String> csvRecs = new ArrayList<>();
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
