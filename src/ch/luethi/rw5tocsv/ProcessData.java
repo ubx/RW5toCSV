@@ -1,4 +1,4 @@
-package ubx.a.b;
+package ch.luethi.rw5tocsv;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -18,24 +18,47 @@ public class ProcessData {
         int cnt = 1;
         for (Rrec rrec : rRecs) {
             Vrec vrec = getVrec(rrec);
-            if (vrecLast == null) {
-                vRecs.add(vrec);
-            } else {
-                if (distance(vrecLast, vrec) < 0.5) {
-                    vRecsShort.add(vrec);
-                } else {
-                    average(vRecs.get(vRecs.size() - 1), vRecsShort);
-                    vRecsShort.clear();
+            if (vrec.state == Vrec.State.VALID) {
+                if (vrecLast == null) {
                     vRecs.add(vrec);
+                } else {
+                    if (distance(vrecLast, vrec) < 0.5) {
+                        vRecsShort.add(vrec);
+                    } else {
+                        average(vRecs.get(vRecs.size() - 1), vRecsShort);
+                        vRecsShort.clear();
+                        vRecs.add(vrec);
+                    }
                 }
+                vrecLast = vrec;
+            } else {
+                vRecs.add(vrec);
             }
-            vrecLast = vrec;
+        }
+        if (vRecsShort.size() > 0) {
+            average(vRecs.get(vRecs.size() - 1), vRecsShort);
+        }
 
+        for (Vrec vrec : vRecs) {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
-                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv));
+                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.VALID ? "" : " ***"));
         }
         return csvRecs;
     }
+
+
+    public static List<String> getCSVRecsWithComment() {
+        List<String> csvRecs = new ArrayList<String>();
+        int cnt = 1;
+        for (Vrec vrec : vRecs) {
+            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
+                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
+                    + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
+                    + " / " + vrec.date + " " + vrec.time +  (vrec.state == Vrec.State.VALID ? "" : "  " + vrec.state.toString()));
+        }
+        return csvRecs;
+    }
+
 
     private static Vrec getVrec(Rrec rrec) {
         Vrec vrec = new Vrec();
@@ -53,6 +76,8 @@ public class ProcessData {
         // --TM00:04:50
         vrec.date = rrec.dt.substring(4);
         vrec.time = rrec.tm.substring(4);
+        // valid ?
+        vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.VALID : Vrec.State.HSDVorVSDVnotInRange;
         return vrec;
     }
 
@@ -69,18 +94,22 @@ public class ProcessData {
         return Math.sqrt(Math.pow(v0.easting - v1.easting, 2) + Math.pow(v0.northing - v1.northing, 2));
 
     }
+
     private static void average(Vrec vrec, List<Vrec> vRecsShort) {
+        if (vrec.state != Vrec.State.VALID) return;
         vrec.numberOfMeasurements = 1 + vRecsShort.size();
+        vrec.pdopMax = vrec.pdop;
+        vrec.pdopMin = vrec.pdop;
         if (vRecsShort.size() == 0) return;
         for (Vrec vr : vRecsShort) {
             vrec.easting += vr.easting;
             vrec.northing += vr.northing;
             vrec.elevation += vr.elevation;
+            vrec.pdopMin = Math.min(vrec.pdopMin, vr.pdop);
+            vrec.pdopMax = Math.max(vrec.pdopMax, vr.pdop);
         }
         vrec.easting /= vrec.numberOfMeasurements;
         vrec.northing /= vrec.numberOfMeasurements;
         vrec.elevation /= vrec.numberOfMeasurements;
     }
-
-
 }

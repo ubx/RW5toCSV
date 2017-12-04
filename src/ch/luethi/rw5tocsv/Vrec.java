@@ -1,6 +1,8 @@
-package ubx.a.b;
+package ch.luethi.rw5tocsv;
 
 public class Vrec {
+
+    protected enum State {VALID, HSDVorVSDVnotInRange}
 
     // these values goes into CSV file
     protected String gcp;
@@ -12,8 +14,8 @@ public class Vrec {
 
     // these value are additions fot the text output
     protected int numberOfMeasurements;
-    protected float pdop;
+    protected float pdop, pdopMin, pdopMax;
     protected String date;
     protected String time;
-    protected String hints;
+    protected State state;
 }

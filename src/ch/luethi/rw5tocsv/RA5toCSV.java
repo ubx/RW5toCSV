@@ -1,4 +1,4 @@
-package ubx.a.b;
+package ch.luethi.rw5tocsv;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -104,10 +104,21 @@ public class RA5toCSV {
         // Process ...
         List<String> csvs = ProcessData.getCSVRecs(rrecs);
 
+        // Write csv file
         BufferedWriter csvOut = new BufferedWriter(new FileWriter(new File(csvfile)));
         for (String l : csvs) {
             csvOut.write(l + "\n");
         }
         csvOut.close();
+
+        // write txt file if given (ProcessData.getCSVRecs must be called before !)(
+        if (txtfile != null) {
+            List<String> txts = ProcessData.getCSVRecsWithComment();
+            BufferedWriter txtOut = new BufferedWriter(new FileWriter(new File(txtfile)));
+            for (String l : txts) {
+                txtOut.write(l + "\n");
+            }
+            txtOut.close();
+        }
     }
 }
