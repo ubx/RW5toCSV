@@ -15,3 +15,4 @@ ToDo
 * more robust RW5 parsing
 * validate results
 * write some test cases
+* encoding RW5 file UTF-16 ?

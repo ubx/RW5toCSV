@@ -50,7 +50,7 @@ public class RA5toCSV {
             exit(1);
         }
 
-        Scanner scanner = new Scanner(new File(rw5file));
+        Scanner scanner = new Scanner(new File(rw5file), "UTF-16");
         Mode mode = Mode.GS;
 
         Rrec lastRrec = null;
