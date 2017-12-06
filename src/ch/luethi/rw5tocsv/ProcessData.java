@@ -65,8 +65,8 @@ public class ProcessData {
         String strs[] = rrec.gs.split(",");
         // --GS,PN1,N 1200261.6916,E 2608973.7195,EL583.6008,--
         try {
-            vrec.easting = Double.valueOf(strs[2].split(" ")[1]);
-            vrec.northing = Double.valueOf(strs[3].split(" ")[1]);
+            vrec.northing = Double.valueOf(strs[2].split(" ")[1]);
+            vrec.easting = Double.valueOf(strs[3].split(" ")[1]);
             vrec.elevation = Float.valueOf(strs[4].substring(2));
             // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
