@@ -22,7 +22,10 @@ public class ProcessData {
                 if (vrecLast == null) {
                     vRecs.add(vrec);
                 } else {
-                    if (distance(vrecLast, vrec) < 0.5) {
+
+                    System.out.println(">>>> dist=" + distance(vrecLast, vrec) * 100.0 + " cm");
+
+                    if ((distance(vrecLast, vrec) < 0.5) && validate(vrecLast, vrec)) {
                         vRecsShort.add(vrec);
                     } else {
                         average(vRecs.get(vRecs.size() - 1), vRecsShort);
@@ -54,7 +57,7 @@ public class ProcessData {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
-                    + " / " + vrec.date + " " + vrec.time +  (vrec.state == Vrec.State.Valid ? "" : "  " + vrec.state.toString()));
+                    + " / " + vrec.date + " " + vrec.time + (vrec.state == Vrec.State.Valid ? "" : "  " + vrec.state.toString()));
         }
         return csvRecs;
     }
@@ -87,19 +90,20 @@ public class ProcessData {
         return vrec;
     }
 
-
-    private static String f3(double val) {
-        return form3.format(val);
+    private static boolean validate(Vrec lastVrec, Vrec vrec) {
+        vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
+        if (vrec.state == Vrec.State.Valid) {
+            if (lastVrec != null) {
+                if ((Math.abs(lastVrec.northing - vrec.northing) > 0.04)
+                        | (Math.abs(lastVrec.easting - vrec.easting) > 0.04)
+                        | (Math.abs(lastVrec.elevation - vrec.elevation) > 0.06)) {
+                    vrec.state = Vrec.State.DriftRExceedsLimits;
+                }
+            }
+        }
+        return vrec.state == Vrec.State.Valid;
     }
 
-    private static String f3(float val) {
-        return form3.format(val);
-    }
-
-    private static double distance(Vrec v0, Vrec v1) {
-        return Math.sqrt(Math.pow(v0.easting - v1.easting, 2) + Math.pow(v0.northing - v1.northing, 2));
-
-    }
 
     private static void average(Vrec vrec, List<Vrec> vRecsShort) {
         if (vrec.state != Vrec.State.Valid) return;
@@ -118,4 +122,20 @@ public class ProcessData {
         vrec.northing /= vrec.numberOfMeasurements;
         vrec.elevation /= vrec.numberOfMeasurements;
     }
+
+
+
+    private static String f3(double val) {
+        return form3.format(val);
+    }
+
+    private static String f3(float val) {
+        return form3.format(val);
+    }
+
+    private static double distance(Vrec v0, Vrec v1) {
+        return Math.sqrt(Math.pow(v0.easting - v1.easting, 2) + Math.pow(v0.northing - v1.northing, 2));
+
+    }
+
 }
