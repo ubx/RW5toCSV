@@ -22,9 +22,6 @@ public class ProcessData {
                 if (vrecLast == null) {
                     vRecs.add(vrec);
                 } else {
-
-                    System.out.println(">>>> dist=" + distance(vrecLast, vrec) * 100.0 + " cm");
-
                     if ((distance(vrecLast, vrec) < 0.5) && validate(vrecLast, vrec)) {
                         vRecsShort.add(vrec);
                     } else {
@@ -91,7 +88,6 @@ public class ProcessData {
     }
 
     private static boolean validate(Vrec lastVrec, Vrec vrec) {
-        vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
         if (vrec.state == Vrec.State.Valid) {
             if (lastVrec != null) {
                 if ((Math.abs(lastVrec.northing - vrec.northing) > 0.04)
