@@ -41,7 +41,7 @@ public class ProcessData {
 
         for (Vrec vrec : vRecs) {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
-                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " ***"));
+                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " *** " + vrec.state + " ***"));
         }
         return csvRecs;
     }
@@ -95,7 +95,7 @@ public class ProcessData {
                 if ((Math.abs(lastVrec.northing - vrec.northing) > 0.04)
                         | (Math.abs(lastVrec.easting - vrec.easting) > 0.04)
                         | (Math.abs(lastVrec.elevation - vrec.elevation) > 0.06)) {
-                    vrec.state = Vrec.State.DriftRExceedsLimits;
+                    vrec.state = Vrec.State.DriftExceedsLimits;
                 }
             }
         }

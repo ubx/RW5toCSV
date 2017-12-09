@@ -2,7 +2,27 @@ package ch.luethi.rw5tocsv;
 
 public class Vrec {
 
-    protected enum State {Valid, HSDVorVSDVnotInRange, FloatingFormatError, RW5FormatError, DriftRExceedsLimits}
+    protected enum State {Valid,
+        HSDVorVSDVnotInRange{
+            public String toString() {
+                return "HSDV or VSDV not in Range";
+            }
+        },
+        FloatingFormatError{
+            public String toString() {
+                return "Floating Format Error";
+            }
+        },
+        RW5FormatError{
+            public String toString() {
+                return "RW5 Format Error";
+            }
+        },
+        DriftExceedsLimits{
+        public String toString() {
+            return "Drift Exceeds Limits";
+        }
+    }}
 
     // these values goes into CSV file
     protected String gcp;
