@@ -54,7 +54,8 @@ public class ProcessData {
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
-                    + " / " + vrec.date + " " + vrec.time + (vrec.state == Vrec.State.Valid ? "" : "  " + vrec.state.toString()));
+                    + " / " + vrec.date + " " + vrec.time + (vrec.state == Vrec.State.Valid ? "" : "  " + vrec.state.toString())
+                    + " from: " + vrec.srcPNs);
         }
         return csvRecs;
     }
@@ -68,6 +69,7 @@ public class ProcessData {
             vrec.northing = Double.valueOf(strs[2].split(" ")[1]);
             vrec.easting = Double.valueOf(strs[3].split(" ")[1]);
             vrec.elevation = Float.valueOf(strs[4].substring(2));
+            vrec.srcPNs = strs[1];
             // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
@@ -113,6 +115,7 @@ public class ProcessData {
             vrec.elevation += vr.elevation;
             vrec.pdopMin = Math.min(vrec.pdopMin, vr.pdop);
             vrec.pdopMax = Math.max(vrec.pdopMax, vr.pdop);
+            vrec.srcPNs += "," + vr.srcPNs;
         }
         vrec.easting /= vrec.numberOfMeasurements;
         vrec.northing /= vrec.numberOfMeasurements;
