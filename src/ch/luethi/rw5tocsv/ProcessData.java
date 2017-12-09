@@ -74,7 +74,7 @@ public class ProcessData {
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
             vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
-            vrec.pdop = Float.valueOf(strs[7].split(":")[1]);
+            vrec.pdop = Float.valueOf(strs[5].split(":")[1]);
             // --DT10-01-2015
             // --TM00:04:50
             vrec.date = rrec.dt.substring(4);
