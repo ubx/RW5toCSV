@@ -4,6 +4,7 @@ public class Rrec {
 
 
     protected String gs,hsdv;
-    protected String dt, tm;
+    protected String dt = "";
+    protected String tm = "";
 
 }

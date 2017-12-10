@@ -85,6 +85,8 @@ public class ProcessData {
             vrec.state = Vrec.State.FloatingFormatError;
         } catch (ArrayIndexOutOfBoundsException ex) {
             vrec.state = Vrec.State.RW5FormatError;
+        } catch (StringIndexOutOfBoundsException ex) {
+            vrec.state = Vrec.State.RW5FormatError;
         }
         return vrec;
     }

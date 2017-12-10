@@ -20,7 +20,7 @@ public class RA5toCSV {
 
     private static String rw5file, csvfile, txtfile;
 
-    private enum Mode {GS, HSDV, DT, TM}
+    private enum Mode {Start, GS, HSDV, DT, TM}
 
     public static void main(String args[]) throws IOException {
 
@@ -50,7 +50,7 @@ public class RA5toCSV {
         }
 
         Scanner scanner = new Scanner(new File(rw5file));
-        Mode mode = Mode.GS;
+        Mode mode = Mode.Start;
         List<Rrec> rrecs = new ArrayList<Rrec>();
         Rrec lastRrec = null;
         String line;
@@ -58,34 +58,35 @@ public class RA5toCSV {
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
             if (line.length() == 0) continue; // skip empty line
+            if (line.startsWith("--GS,")) {
+                mode = Mode.GS;
+            }
             switch (mode) {
                 case GS:
-                    if (line.startsWith("--GS,")) {
-                        if (lastRrec != null) {
-                            rrecs.add(lastRrec);
-                        }
-                        lastRrec = new Rrec();
-                        lastRrec.gs = line;
-                        mode = Mode.HSDV;
-                        break;
+                    if (lastRrec != null) {
+                        rrecs.add(lastRrec);
                     }
+                    lastRrec = new Rrec();
+                    lastRrec.gs = line;
+                    mode = Mode.HSDV;
+                    break;
                 case HSDV:
-                    if (lastRrec != null && line.startsWith("--HSDV:")) {
+                    if (line.startsWith("--HSDV:")) {
                         lastRrec.hsdv = line;
                         mode = Mode.DT;
                         break;
                     }
                 case DT:
-                    if (lastRrec != null && line.startsWith("--DT")) {
+                    if (line.startsWith("--DT")) {
                         lastRrec.dt = line;
                         mode = Mode.TM;
                         break;
                     }
 
                 case TM:
-                    if (lastRrec != null && line.startsWith("--TM")) {
+                    if (line.startsWith("--TM")) {
                         lastRrec.tm = line;
-                        mode = Mode.GS;
+                        mode = Mode.Start;
                         break;
                     }
             }
