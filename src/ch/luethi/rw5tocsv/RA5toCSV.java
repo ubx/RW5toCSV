@@ -22,7 +22,6 @@ public class RA5toCSV {
 
     private enum Mode {GS, HSDV, DT, TM}
 
-
     public static void main(String args[]) throws IOException {
 
         CommandLineParser parser = new DefaultParser();
@@ -52,53 +51,47 @@ public class RA5toCSV {
 
         Scanner scanner = new Scanner(new File(rw5file));
         Mode mode = Mode.GS;
-
-        Rrec lastRrec = null;
         List<Rrec> rrecs = new ArrayList<Rrec>();
-
+        Rrec lastRrec = null;
+        String line;
         // Reading each line of file using Scanner class
-        int lineNumber = 1;
         while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
+            line = scanner.nextLine();
             if (line.length() == 0) continue; // skip empty line
             switch (mode) {
                 case GS:
                     if (line.startsWith("--GS,")) {
+                        if (lastRrec != null) {
+                            rrecs.add(lastRrec);
+                        }
                         lastRrec = new Rrec();
                         lastRrec.gs = line;
                         mode = Mode.HSDV;
                         break;
                     }
                 case HSDV:
-                    if (line.startsWith("--HSDV:")) {
-                        if (lastRrec == null) {
-                            lastRrec = new Rrec();
-                        }
+                    if (lastRrec != null && line.startsWith("--HSDV:")) {
                         lastRrec.hsdv = line;
                         mode = Mode.DT;
                         break;
                     }
                 case DT:
-                    if (line.startsWith("--DT")) {
-                        if (lastRrec == null) {
-                            lastRrec = new Rrec();
-                        }
+                    if (lastRrec != null && line.startsWith("--DT")) {
                         lastRrec.dt = line;
                         mode = Mode.TM;
                         break;
                     }
 
                 case TM:
-                    if (line.startsWith("--TM")) {
-                        if (lastRrec == null) {
-                            lastRrec = new Rrec();
-                        }
+                    if (lastRrec != null && line.startsWith("--TM")) {
                         lastRrec.tm = line;
                         mode = Mode.GS;
-                        rrecs.add(lastRrec);
                         break;
                     }
             }
+        }
+        if (lastRrec != null) {
+            rrecs.add(lastRrec);
         }
 
         // Process ...
@@ -121,4 +114,5 @@ public class RA5toCSV {
             txtOut.close();
         }
     }
+
 }
