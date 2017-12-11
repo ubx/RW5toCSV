@@ -39,4 +39,5 @@ public class Vrec {
     protected String time;
     protected State state;
     protected final StringBuffer srcPNs = new StringBuffer();
+    protected double distTopPrev = 0.0;
 }
