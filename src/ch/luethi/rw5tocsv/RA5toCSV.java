@@ -28,9 +28,9 @@ public class RA5toCSV {
         Options options = new Options();
         options.addRequiredOption(RW5, "RW5 input file", true, "RW5 file to extract data");
         options.addRequiredOption(CSV, "CSV output file", true, "CSV to write data");
-        options.addOption(TXT, "TXT output file", true, "optional text to write comments");
+        options.addOption(TXT, "TXT output file", true, "optional text file to write comments");
 
-        CommandLine cmd = null;
+        CommandLine cmd;
 
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(200);
@@ -51,12 +51,11 @@ public class RA5toCSV {
 
         Scanner scanner = new Scanner(new File(rw5file));
         Mode mode = Mode.Start;
-        List<Rrec> rrecs = new ArrayList<Rrec>();
+        List<Rrec> rrecs = new ArrayList<>();
         Rrec lastRrec = null;
-        String line;
         // Reading each line of file using Scanner class
         while (scanner.hasNextLine()) {
-            line = scanner.nextLine();
+            String line = scanner.nextLine();
             if (line.length() == 0) continue; // skip empty line
             if (line.startsWith("--GS,")) {
                 mode = Mode.GS;

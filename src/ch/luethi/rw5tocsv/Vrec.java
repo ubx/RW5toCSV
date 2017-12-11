@@ -38,5 +38,5 @@ public class Vrec {
     protected String date;
     protected String time;
     protected State state;
-    protected String srcPNs = "";
+    protected final StringBuffer srcPNs = new StringBuffer();
 }

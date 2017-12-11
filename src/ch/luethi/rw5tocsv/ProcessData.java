@@ -69,7 +69,7 @@ public class ProcessData {
             vrec.northing = Double.valueOf(strs[2].split(" ")[1]);
             vrec.easting = Double.valueOf(strs[3].split(" ")[1]);
             vrec.elevation = Float.valueOf(strs[4].substring(2));
-            vrec.srcPNs = strs[1];
+            vrec.srcPNs.append(strs[1]);
             // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
@@ -83,9 +83,7 @@ public class ProcessData {
             vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
         } catch (NumberFormatException ex) {
             vrec.state = Vrec.State.FloatingFormatError;
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            vrec.state = Vrec.State.RW5FormatError;
-        } catch (StringIndexOutOfBoundsException ex) {
+        } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ex) {
             vrec.state = Vrec.State.RW5FormatError;
         }
         return vrec;
@@ -117,7 +115,7 @@ public class ProcessData {
             vrec.elevation += vr.elevation;
             vrec.pdopMin = Math.min(vrec.pdopMin, vr.pdop);
             vrec.pdopMax = Math.max(vrec.pdopMax, vr.pdop);
-            vrec.srcPNs += "," + vr.srcPNs;
+            vrec.srcPNs.append(",").append(vr.srcPNs);
         }
         vrec.easting /= vrec.numberOfMeasurements;
         vrec.northing /= vrec.numberOfMeasurements;
