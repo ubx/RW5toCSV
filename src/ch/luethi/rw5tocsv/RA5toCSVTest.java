@@ -1,17 +1,14 @@
 package ch.luethi.rw5tocsv;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
 
 import java.io.File;
 import java.io.IOException;
 
 import static org.apache.commons.io.FileUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RA5toCSVTest {
 
@@ -21,6 +18,15 @@ class RA5toCSVTest {
     private static final String BERNECK_TXT = TESTDATA + "/BERNECK.txt";
     private static final String BERNECK_REF_CSV = TESTDATA + "/BERNECK-ref.csv";
     private static final String BERNECK_REF_TXT = TESTDATA + "/BERNECK-ref.txt";
+
+    private static final String FORMARERROR_RW5 = TESTDATA + "/test-00.rw5";
+    private static final String FORMARERROR_CSV = TESTDATA + "/test-00.csv";
+    private static final String FORMARERROR_REF_CSV = TESTDATA + "/test-00-ref.csv";
+
+    private static final String FloatingFormatError_RW5 = TESTDATA + "/test-01.rw5";
+    private static final String FloatingFormatError_CSV = TESTDATA + "/test-01.csv";
+    private static final String FloatingFormatError_REF_CSV = TESTDATA + "/test-01-ref.csv";
+
 
     private static final String TEST_CSV = TESTDATA + "/testA.csv";
 
@@ -34,11 +40,25 @@ class RA5toCSVTest {
 
     @Test
     void basicTest() throws IOException {
-        forceDelete(new File(BERNECK_CSV));
-        forceDelete(new File(BERNECK_TXT));
+        deleteQuietly(new File(BERNECK_CSV));
+        deleteQuietly(new File(BERNECK_TXT));
         RA5toCSV.main(new String[]{"-r", BERNECK_RW5, "-c", BERNECK_CSV, "-t", BERNECK_TXT});
         assertTrue(contentEquals(new File(BERNECK_CSV), new File(BERNECK_REF_CSV)), "The files differ!");
         assertTrue(contentEquals(new File(BERNECK_TXT), new File(BERNECK_REF_TXT)), "The files differ!");
+    }
+
+    @Test
+    void formatErrorTest() throws IOException {
+        deleteQuietly(new File(FORMARERROR_CSV));
+        RA5toCSV.main(new String[]{"-r", FORMARERROR_RW5, "-c", FORMARERROR_CSV});
+        assertTrue(contentEquals(new File(FORMARERROR_CSV), new File(FORMARERROR_REF_CSV)), "The files differ!");
+    }
+
+    @Test
+    void FloatingFormatErrorTest() throws IOException {
+        deleteQuietly(new File(FloatingFormatError_CSV));
+        RA5toCSV.main(new String[]{"-r", FloatingFormatError_RW5, "-c", FloatingFormatError_CSV});
+        assertTrue(contentEquals(new File(FloatingFormatError_CSV), new File(FloatingFormatError_REF_CSV)), "The files differ!");
     }
 
 }
