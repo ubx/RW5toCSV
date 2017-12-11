@@ -45,7 +45,7 @@ public class RA5toCSV {
             }
 
         } catch (ParseException e) {
-            formatter.printHelp("ra5toCsv", options);
+            formatter.printHelp("java -jar RW5toCSV.jar args", options);
             exit(1);
         }
 
