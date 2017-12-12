@@ -34,6 +34,11 @@ class RA5toCSVTest {
     private static final String DriftExceedsLimits_TXT = TESTDATA + "/P301-12_AARE.txt";
     private static final String DriftExceedsLimits_REF_TXT = TESTDATA + "/P301-12_AARE-ref.txt";
 
+    private static final String Test002_RW5 = TESTDATA + "/test-02.rw5";
+    private static final String Test002_CSV = TESTDATA + "/test-02.csv";
+    private static final String Test002_TXT = TESTDATA + "/test-02.txt";
+    private static final String Test002_REF_TXT = TESTDATA + "/test-02-ref.txt";
+
     @BeforeEach
     void setUp() {
     }
@@ -64,11 +69,20 @@ class RA5toCSVTest {
         RA5toCSV.main(new String[]{"-r", FloatingFormatError_RW5, "-c", FloatingFormatError_CSV});
         assertTrue(contentEquals(new File(FloatingFormatError_CSV), new File(FloatingFormatError_REF_CSV)), THE_FILES_DIFFER);
     }
+
     @Test
     void DriftExceedsLimitsTest() throws IOException {
         deleteQuietly(new File(DriftExceedsLimits_TXT));
         RA5toCSV.main(new String[]{"-r", DriftExceedsLimits_RW5, "-t", DriftExceedsLimits_TXT, "-c", DriftExceedsLimits_CSV});
         assertTrue(contentEquals(new File(DriftExceedsLimits_TXT), new File(DriftExceedsLimits_REF_TXT)), THE_FILES_DIFFER);
+    }
+
+    @Test
+    void issue5_Test() throws IOException {
+        deleteQuietly(new File(Test002_TXT));
+        deleteQuietly(new File(Test002_CSV));
+        RA5toCSV.main(new String[]{"-r", Test002_RW5, "-t", Test002_TXT, "-c",Test002_CSV });
+        assertTrue(contentEquals(new File(Test002_TXT), new File(Test002_REF_TXT)), THE_FILES_DIFFER);
     }
 
 }

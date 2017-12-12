@@ -27,6 +27,8 @@ public class ProcessData {
                         average(vRecs.get(vRecs.size()-1), vRecsShort);
                         vRecsShort.clear();
                     }
+                } else {
+                    average(vRecs.get(vRecs.size()-1), vRecsShort);
                 }
             }
             vRecs.add(vrec);
