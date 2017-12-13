@@ -7,6 +7,7 @@ import java.util.List;
 public class ProcessData {
 
     private static final DecimalFormat form3 = new DecimalFormat("0.000");
+    private static final DecimalFormat form3Error = new DecimalFormat("0.***");
     private static final String SEP = ",";
     private static List<Vrec> vRecs = null;
 
@@ -18,9 +19,10 @@ public class ProcessData {
         for (Rrec rrec : rRecs) {
             Vrec vrec = getVrec(rrec);
             if (vRecs.size() > 0) {
-                if (vrec.state == Vrec.State.Valid) {
+                if (vrec.state == Vrec.State.Valid || vrec.state == Vrec.State.HSDVorVSDVnotInRange) {
                     vrec.distTopPrev = distance(vRecs.get(vRecs.size()-1), vrec); // todo -- for test only
-                    if ((distance(vRecs.get(vRecs.size()-1), vrec) < 0.5) && validate(vRecs.get(vRecs.size()-1), vrec)) {
+                    if ((distance(vRecs.get(vRecs.size()-1), vrec) < 0.5)) {
+                        checkNotDriftExceedsLimits(vRecs.get(vRecs.size()-1), vrec);
                         vRecsShort.add(vrec);
                         continue;
                     } else {
@@ -36,10 +38,31 @@ public class ProcessData {
         addShort(vRecsShort);
 
         for (Vrec vrec : vRecs) {
-            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
+            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, isError(vrec)) + SEP + f3(vrec.northing, isError(vrec)) + SEP + f3(vrec.elevation, isError(vrec))
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " *** " + vrec.state + " ***"));
         }
         return csvRecs;
+    }
+
+
+    public static List<String> getCSVRecsWithComment() {
+        List<String> csvRecs = new ArrayList<>();
+        int cnt = 1;
+        for (Vrec vrec : vRecs) {
+            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, isError(vrec)) + SEP + f3(vrec.northing, isError(vrec)) + SEP + f3(vrec.elevation, isError(vrec))
+                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
+                    + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
+                    + " / " + vrec.date + " " + vrec.time  + getsrcPNs(vrec));
+        }
+        return csvRecs;
+    }
+
+    private static boolean isError(Vrec vrec) {
+        for (Vrec.SrcDesc desc: vrec.srcDescs
+                ) {
+            if (desc.state == Vrec.State.DriftExceedsLimits || desc.state == Vrec.State.HSDVorVSDVnotInRange) return true;
+        }
+        return false;
     }
 
     private static void addShort(List<Vrec> vRecsShort) {
@@ -48,18 +71,23 @@ public class ProcessData {
         }
     }
 
-
-    public static List<String> getCSVRecsWithComment() {
-        List<String> csvRecs = new ArrayList<>();
-        int cnt = 1;
-        for (Vrec vrec : vRecs) {
-            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting) + SEP + f3(vrec.northing) + SEP + f3(vrec.elevation)
-                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
-                    + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
-                    + " / " + vrec.date + " " + vrec.time + (vrec.state == Vrec.State.Valid ? "" : "  " + vrec.state.toString())
-                    + " from: " + vrec.srcPNs);
+    private static String getsrcPNs(Vrec vrec) {
+        int ecnt = 0;
+        StringBuffer sb = new StringBuffer();
+        for (Vrec.SrcDesc desc: vrec.srcDescs) {
+            if (sb.length() > 0) sb.append(',');
+            sb.append(desc.name);
+            if (desc.state != Vrec.State.Valid) {
+                sb.append('(').append(desc.state).append(')');
+                ecnt++;
+            }
         }
-        return csvRecs;
+        if (ecnt > 0) {
+            sb.insert(0, " ERROR from: ");
+        } else {
+            sb.insert(0, " from: ");
+        }
+        return sb.toString();
     }
 
 
@@ -71,7 +99,7 @@ public class ProcessData {
             vrec.northing = Double.valueOf(strs[2].split(" ")[1]);
             vrec.easting = Double.valueOf(strs[3].split(" ")[1]);
             vrec.elevation = Float.valueOf(strs[4].substring(2));
-            vrec.srcPNs.append(strs[1]);
+            vrec.srcPN = strs[1];
             vrec.numberOfMeasurements = 1;
             // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
@@ -86,6 +114,7 @@ public class ProcessData {
             vrec.time = rrec.tm.substring(4);
             // valid ?
             vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
+            vrec.srcDescs.add(new Vrec.SrcDesc(vrec.srcPN,vrec.state));
         } catch (NumberFormatException ex) {
             vrec.state = Vrec.State.FloatingFormatError;
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ex) {
@@ -94,7 +123,7 @@ public class ProcessData {
         return vrec;
     }
 
-    private static boolean validate(Vrec lastVrec, Vrec vrec) {
+    private static void checkNotDriftExceedsLimits(Vrec lastVrec, Vrec vrec) {
         if (vrec.state == Vrec.State.Valid) {
             if (lastVrec != null) {
                 if ((Math.abs(lastVrec.northing - vrec.northing) > 0.04)
@@ -104,7 +133,6 @@ public class ProcessData {
                 }
             }
         }
-        return vrec.state == Vrec.State.Valid;
     }
 
 
@@ -120,7 +148,7 @@ public class ProcessData {
             vrec.elevation += vr.elevation;
             vrec.pdopMin = Math.min(vrec.pdopMin, vr.pdop);
             vrec.pdopMax = Math.max(vrec.pdopMax, vr.pdop);
-            vrec.srcPNs.append(",").append(vr.srcPNs);
+            vrec.srcDescs.add(new Vrec.SrcDesc(vr.srcPN, vr.state));
         }
         vrec.easting /= vrec.numberOfMeasurements;
         vrec.northing /= vrec.numberOfMeasurements;
@@ -129,8 +157,17 @@ public class ProcessData {
 
 
 
+    private static String f3(double val, boolean error) {
+        if (error) return form3Error.format(val);
+        return f3(val);
+    }
     private static String f3(double val) {
         return form3.format(val);
+    }
+
+    private static String f3(float val, boolean error) {
+        if (error) return form3Error.format(val);
+        return f3(val);
     }
 
     private static String f3(float val) {

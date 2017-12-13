@@ -1,5 +1,8 @@
 package ch.luethi.rw5tocsv;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Vrec {
 
     protected enum State {Valid,
@@ -24,6 +27,16 @@ public class Vrec {
         }
     }}
 
+    protected static class SrcDesc {
+        String name;
+        State state;
+
+        public SrcDesc(String name, State state) {
+            this.name = name;
+            this.state = state;
+        }
+    }
+
     // these values goes into CSV file
     protected String gcp;
     protected double easting;
@@ -38,6 +51,7 @@ public class Vrec {
     protected String date;
     protected String time;
     protected State state;
-    protected final StringBuffer srcPNs = new StringBuffer();
+    protected String srcPN;
     protected double distTopPrev = 0.0;
+    protected List<SrcDesc> srcDescs = new ArrayList<>();
 }
