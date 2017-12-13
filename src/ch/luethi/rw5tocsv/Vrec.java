@@ -37,8 +37,6 @@ public class Vrec {
         }
     }
 
-    // these values goes into CSV file
-    protected String gcp;
     protected double easting;
     protected double northing;
     protected float elevation;

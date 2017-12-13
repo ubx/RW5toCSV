@@ -20,17 +20,17 @@ public class ProcessData {
             Vrec vrec = getVrec(rrec);
             if (vRecs.size() > 0) {
                 if (vrec.state == Vrec.State.Valid || vrec.state == Vrec.State.HSDVorVSDVnotInRange) {
-                    vrec.distTopPrev = distance(vRecs.get(vRecs.size()-1), vrec); // todo -- for test only
-                    if ((distance(vRecs.get(vRecs.size()-1), vrec) < 0.5)) {
-                        checkNotDriftExceedsLimits(vRecs.get(vRecs.size()-1), vrec);
+                    vrec.distTopPrev = distance(vRecs.get(vRecs.size() - 1), vrec); // todo -- for test only
+                    if ((distance(vRecs.get(vRecs.size() - 1), vrec) < 0.5)) {
+                        checkNotDriftExceedsLimits(vRecs.get(vRecs.size() - 1), vrec);
                         vRecsShort.add(vrec);
                         continue;
                     } else {
-                        average(vRecs.get(vRecs.size()-1), vRecsShort);
+                        average(vRecs.get(vRecs.size() - 1), vRecsShort);
                         vRecsShort.clear();
                     }
                 } else {
-                    average(vRecs.get(vRecs.size()-1), vRecsShort);
+                    average(vRecs.get(vRecs.size() - 1), vRecsShort);
                 }
             }
             vRecs.add(vrec);
@@ -38,7 +38,8 @@ public class ProcessData {
         addShort(vRecsShort);
 
         for (Vrec vrec : vRecs) {
-            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, isError(vrec)) + SEP + f3(vrec.northing, isError(vrec)) + SEP + f3(vrec.elevation, isError(vrec))
+            boolean error = isError(vrec);
+            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " *** " + vrec.state + " ***"));
         }
         return csvRecs;
@@ -49,18 +50,20 @@ public class ProcessData {
         List<String> csvRecs = new ArrayList<>();
         int cnt = 1;
         for (Vrec vrec : vRecs) {
-            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, isError(vrec)) + SEP + f3(vrec.northing, isError(vrec)) + SEP + f3(vrec.elevation, isError(vrec))
+            boolean error = isError(vrec);
+            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
-                    + " / " + vrec.date + " " + vrec.time  + getsrcPNs(vrec));
+                    + " / " + vrec.date + " " + vrec.time + getsrcPNs(vrec));
         }
         return csvRecs;
     }
 
     private static boolean isError(Vrec vrec) {
-        for (Vrec.SrcDesc desc: vrec.srcDescs
+        for (Vrec.SrcDesc desc : vrec.srcDescs
                 ) {
-            if (desc.state == Vrec.State.DriftExceedsLimits || desc.state == Vrec.State.HSDVorVSDVnotInRange) return true;
+            if (desc.state == Vrec.State.DriftExceedsLimits || desc.state == Vrec.State.HSDVorVSDVnotInRange)
+                return true;
         }
         return false;
     }
@@ -73,8 +76,8 @@ public class ProcessData {
 
     private static String getsrcPNs(Vrec vrec) {
         int ecnt = 0;
-        StringBuffer sb = new StringBuffer();
-        for (Vrec.SrcDesc desc: vrec.srcDescs) {
+        StringBuilder sb = new StringBuilder();
+        for (Vrec.SrcDesc desc : vrec.srcDescs) {
             if (sb.length() > 0) sb.append(',');
             sb.append(desc.name);
             if (desc.state != Vrec.State.Valid) {
@@ -114,7 +117,7 @@ public class ProcessData {
             vrec.time = rrec.tm.substring(4);
             // valid ?
             vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
-            vrec.srcDescs.add(new Vrec.SrcDesc(vrec.srcPN,vrec.state));
+            vrec.srcDescs.add(new Vrec.SrcDesc(vrec.srcPN, vrec.state));
         } catch (NumberFormatException ex) {
             vrec.state = Vrec.State.FloatingFormatError;
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ex) {
@@ -156,22 +159,22 @@ public class ProcessData {
     }
 
 
-
-    private static String f3(double val, boolean error) {
-        if (error) return form3Error.format(val);
-        return f3(val);
-    }
     private static String f3(double val) {
         return form3.format(val);
     }
 
-    private static String f3(float val, boolean error) {
+    private static String f3(double val, boolean error) {
         if (error) return form3Error.format(val);
         return f3(val);
     }
 
     private static String f3(float val) {
         return form3.format(val);
+    }
+
+    private static String f3(float val, boolean error) {
+        if (error) return form3Error.format(val);
+        return f3(val);
     }
 
     private static double distance(Vrec v0, Vrec v1) {
