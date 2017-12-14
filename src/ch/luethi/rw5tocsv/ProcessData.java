@@ -12,10 +12,8 @@ public class ProcessData {
     private static List<Vrec> vRecs = null;
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
-        List<String> csvRecs = new ArrayList<>();
         vRecs = new ArrayList<>();
         List<Vrec> vRecsShort = new ArrayList<>();
-        int cnt = 1;
         for (Rrec rrec : rRecs) {
             Vrec vrec = getVrec(rrec);
             if (vRecs.size() > 0) {
@@ -37,6 +35,8 @@ public class ProcessData {
         }
         addShort(vRecsShort);
 
+        List<String> csvRecs = new ArrayList<>();
+        int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
             csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
@@ -60,9 +60,8 @@ public class ProcessData {
     }
 
     private static boolean isError(Vrec vrec) {
-        for (Vrec.SrcDesc desc : vrec.srcDescs
-                ) {
-            if (desc.state == Vrec.State.DriftExceedsLimits || desc.state == Vrec.State.HSDVorVSDVnotInRange)
+        for (Vrec.SrcDesc desc : vrec.srcDescs) {
+            if ((desc.state == Vrec.State.DriftExceedsLimits) || (desc.state == Vrec.State.HSDVorVSDVnotInRange))
                 return true;
         }
         return false;
@@ -85,12 +84,7 @@ public class ProcessData {
                 ecnt++;
             }
         }
-        if (ecnt > 0) {
-            sb.insert(0, " ERROR from: ");
-        } else {
-            sb.insert(0, " from: ");
-        }
-        return sb.toString();
+        return sb.insert(0, ecnt > 0 ? " ERROR from: " : " from: ").toString();
     }
 
 
@@ -116,7 +110,7 @@ public class ProcessData {
             vrec.date = rrec.dt.substring(4);
             vrec.time = rrec.tm.substring(4);
             // valid ?
-            vrec.state = (vrec.hsdv < 0.04 & vrec.vsdv < 0.06) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
+            vrec.state = ((vrec.hsdv < 0.04) & (vrec.vsdv < 0.06)) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
             vrec.srcDescs.add(new Vrec.SrcDesc(vrec.srcPN, vrec.state));
         } catch (NumberFormatException ex) {
             vrec.state = Vrec.State.FloatingFormatError;
@@ -179,7 +173,6 @@ public class ProcessData {
 
     private static double distance(Vrec v0, Vrec v1) {
         return Math.sqrt(Math.pow(v0.easting - v1.easting, 2) + Math.pow(v0.northing - v1.northing, 2));
-
     }
 
 }

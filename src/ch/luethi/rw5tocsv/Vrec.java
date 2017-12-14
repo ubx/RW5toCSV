@@ -31,7 +31,7 @@ public class Vrec {
         String name;
         State state;
 
-        public SrcDesc(String name, State state) {
+        SrcDesc(String name, State state) {
             this.name = name;
             this.state = state;
         }
