@@ -88,7 +88,7 @@ public class ProcessData {
                 ecnt++;
             }
         }
-        return sb.insert(0, ecnt > 0 ? " ERROR from: " : " from: ").toString();
+        return sb.insert(0, ecnt > 0 ? " ERROR [" : " [").append("]").toString();
     }
 
 
