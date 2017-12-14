@@ -45,7 +45,7 @@ public class Vrec {
 
     // these value are additions fot the text output
     protected int numberOfMeasurements;
-    protected float pdop, pdopMin, pdopMax;
+    protected float sats, satsMin, satsMax;
     protected String date;
     protected String time;
     protected State state;

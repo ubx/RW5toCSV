@@ -57,7 +57,7 @@ public class ProcessData {
             boolean error = isError(vrec);
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
-                    + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
+                    + "  -  #" + vrec.numberOfMeasurements + " / SATS: " + f3(vrec.satsMin) + "-" + f3(vrec.satsMax)
                     + " / " + vrec.date + " " + vrec.time + getsrcPNs(vrec));
         }
         return csvRecs;
@@ -106,9 +106,9 @@ public class ProcessData {
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
             vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
-            vrec.pdop = Float.valueOf(strs[5].split(":")[1]);
-            vrec.pdopMin = vrec.pdop;
-            vrec.pdopMax = vrec.pdop;
+            vrec.sats = Float.valueOf(strs[3].split(":")[1]);
+            vrec.satsMin = vrec.sats;
+            vrec.satsMax = vrec.sats;
             // --DT10-01-2015
             // --TM00:04:50
             vrec.date = rrec.dt.substring(4);
@@ -140,15 +140,15 @@ public class ProcessData {
     private static void average(Vrec vrec, List<Vrec> vRecsShort) {
         if (vrec.state != Vrec.State.Valid) return;
         vrec.numberOfMeasurements = 1 + vRecsShort.size();
-        vrec.pdopMax = vrec.pdop;
-        vrec.pdopMin = vrec.pdop;
+        vrec.satsMax = vrec.sats;
+        vrec.satsMin = vrec.sats;
         if (vRecsShort.size() == 0) return;
         for (Vrec vr : vRecsShort) {
             vrec.easting += vr.easting;
             vrec.northing += vr.northing;
             vrec.elevation += vr.elevation;
-            vrec.pdopMin = Math.min(vrec.pdopMin, vr.pdop);
-            vrec.pdopMax = Math.max(vrec.pdopMax, vr.pdop);
+            vrec.satsMin = Math.min(vrec.satsMin, vr.sats);
+            vrec.satsMax = Math.max(vrec.satsMax, vr.sats);
             vrec.srcDescs.add(new Vrec.SrcDesc(vr.srcPN, vr.state));
         }
         vrec.easting /= vrec.numberOfMeasurements;
