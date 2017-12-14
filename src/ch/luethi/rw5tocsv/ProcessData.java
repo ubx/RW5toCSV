@@ -39,10 +39,14 @@ public class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
-            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
+            csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " *** " + vrec.state + " ***"));
         }
         return csvRecs;
+    }
+
+    private static String getGCP(int cnt) {
+        return String.format("%s%02d", "GCP", cnt);
     }
 
 
@@ -51,7 +55,7 @@ public class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
-            csvRecs.add("GCP" + cnt++ + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
+            csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.numberOfMeasurements + " / PDOP: " + f3(vrec.pdopMin) + "-" + f3(vrec.pdopMax)
                     + " / " + vrec.date + " " + vrec.time + getsrcPNs(vrec));
