@@ -114,7 +114,13 @@ public class ProcessData {
             vrec.date = rrec.dt.substring(4);
             vrec.time = rrec.tm.substring(4);
             // valid ?
-            vrec.state = ((vrec.hsdv < 0.04) & (vrec.vsdv < 0.06)) ? Vrec.State.Valid : Vrec.State.HSDVorVSDVnotInRange;
+            if((vrec.hsdv < 0.04) & (vrec.vsdv < 0.06)) {
+                vrec.state = Vrec.State.Valid;
+            } else {
+                vrec.state = Vrec.State.HSDVorVSDVnotInRange;
+                vrec.state.hsdv = vrec.hsdv >= 0.04;
+                vrec.state.vsdv = vrec.vsdv >= 0.06;
+            }
             vrec.srcDescs.add(new Vrec.SrcDesc(vrec.srcPN, vrec.state));
         } catch (NumberFormatException ex) {
             vrec.state = Vrec.State.FloatingFormatError;
@@ -138,7 +144,6 @@ public class ProcessData {
 
 
     private static void average(Vrec vrec, List<Vrec> vRecsShort) {
-        if (vrec.state != Vrec.State.Valid) return;
         vrec.numberOfMeasurements = 1 + vRecsShort.size();
         vrec.satsMax = vrec.sats;
         vrec.satsMin = vrec.sats;

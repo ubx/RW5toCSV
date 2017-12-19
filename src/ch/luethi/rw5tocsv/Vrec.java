@@ -5,27 +5,34 @@ import java.util.List;
 
 public class Vrec {
 
-    protected enum State {Valid,
-        HSDVorVSDVnotInRange{
+    protected enum State {
+        Valid,
+        HSDVorVSDVnotInRange {
             public String toString() {
-                return "HSDV or VSDV not in Range";
+                if (hsdv & vsdv)
+                    return "HSDV and VSDV not in Range";
+                else if (hsdv)
+                    return "HSDV not in Range";
+                return "VSDV not in Range";
             }
         },
-        FloatingFormatError{
+        FloatingFormatError {
             public String toString() {
                 return "Floating Format Error";
             }
         },
-        RW5FormatError{
+        RW5FormatError {
             public String toString() {
                 return "RW5 Format Error";
             }
         },
-        DriftExceedsLimits{
-        public String toString() {
-            return "Drift Exceeds Limits";
-        }
-    }}
+        DriftExceedsLimits {
+            public String toString() {
+                return "Drift Exceeds Limits";
+            }
+        };
+        boolean hsdv, vsdv;
+    }
 
     protected static class SrcDesc {
         String name;
