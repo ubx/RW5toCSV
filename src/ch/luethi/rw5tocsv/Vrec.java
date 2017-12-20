@@ -6,13 +6,18 @@ import java.util.List;
 public class Vrec {
 
     protected enum State {
+
         Valid,
-        HSDVorVSDVnotInRange {
+        HSDVandVSDVnotInRange {
             public String toString() {
-                if (hsdv & vsdv)
-                    return "HSDV and VSDV not in Range";
-                else if (hsdv)
-                    return "HSDV not in Range";
+                return "HSDV and VSDV not in Range";
+            }
+        }, HSDVnotInRange {
+            public String toString() {
+                return "HSDV not in Range";
+            }
+        }, VSDVnotInRange {
+            public String toString() {
                 return "VSDV not in Range";
             }
         },
@@ -31,7 +36,6 @@ public class Vrec {
                 return "Drift Exceeds Limits";
             }
         };
-        boolean hsdv, vsdv;
     }
 
     protected static class SrcDesc {
