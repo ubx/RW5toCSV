@@ -53,7 +53,7 @@ public class ProcessData {
             boolean error = isError(vrec);
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
-                    + "  -  #" + vrec.numberOfMeasurements + " / SATS: " + f3(vrec.satsMin) + "-" + f3(vrec.satsMax)
+                    + "  -  #" + vrec.numberOfMeasurements + " / SATS: " + String.format("%02d-%02d",vrec.satsMin,vrec.satsMax)
                     + " / " + vrec.date + " " + vrec.time + getSrcPNs(vrec));
         }
         return csvRecs;
@@ -114,7 +114,7 @@ public class ProcessData {
             strs = rrec.hsdv.split(",");
             vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
             vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
-            vrec.sats = Float.valueOf(strs[3].split(":")[1]);
+            vrec.sats = Integer.valueOf(strs[3].split(":")[1]);
             vrec.satsMin = vrec.sats;
             vrec.satsMax = vrec.sats;
             // --DT10-01-2015
