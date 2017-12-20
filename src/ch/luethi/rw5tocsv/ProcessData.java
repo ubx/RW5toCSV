@@ -170,6 +170,8 @@ public class ProcessData {
             vrec.elevation += vr.elevation;
             vrec.satsMin = Math.min(vrec.satsMin, vr.sats);
             vrec.satsMax = Math.max(vrec.satsMax, vr.sats);
+            vrec.hsdv = Math.max(vrec.hsdv, vr.hsdv);
+            vrec.vsdv = Math.max(vrec.vsdv, vr.vsdv);
             vrec.srcVrecs.add(vr);
         }
         vrec.easting /= vrec.numberOfMeasurements;
