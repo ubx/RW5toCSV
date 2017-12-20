@@ -68,8 +68,8 @@ public class ProcessData {
     }
 
     private static boolean isError(Vrec vrec) {
-        for (Vrec.SrcDesc desc : vrec.srcDescs) {
-            if (desc.state == Vrec.State.DriftExceedsLimits || desc.state == Vrec.State.HSDVandVSDVnotInRange || desc.state == Vrec.State.HSDVnotInRange || desc.state == Vrec.State.VSDVnotInRange) {
+        for (Vrec srcVrec : vrec.srcVrecs) {
+            if (srcVrec.state == Vrec.State.DriftExceedsLimits || srcVrec.state == Vrec.State.HSDVandVSDVnotInRange || srcVrec.state == Vrec.State.HSDVnotInRange || srcVrec.state == Vrec.State.VSDVnotInRange) {
                 return true;
             }
         }
@@ -89,11 +89,13 @@ public class ProcessData {
     private static String getSrcPNs(Vrec vrec) {
         int ecnt = 0;
         StringBuilder sb = new StringBuilder();
-        for (Vrec.SrcDesc desc : vrec.srcDescs) {
+        for (Vrec srcVrec : vrec.srcVrecs) {
             if (sb.length() > 0) sb.append(',');
-            sb.append(desc.name);
-            if (desc.state != Vrec.State.Valid) {
-                sb.append('(').append(desc.state).append(')');
+            sb.append(srcVrec.srcPN);
+            if (srcVrec.state != Vrec.State.Valid) {
+                sb.append('(').append(srcVrec.state == Vrec.State.DriftExceedsLimits
+                        ? String.format(srcVrec.state.toString(), srcVrec.driftExceedsLimitX ? "X":"", srcVrec.driftExceedsLimitY ? "Y":"", srcVrec.driftExceedsLimitZ ? "Z":"")
+                        : srcVrec.state).append(')');
                 ecnt++;
             }
         }
@@ -132,21 +134,22 @@ public class ProcessData {
             } else {
                 vrec.state = Vrec.State.VSDVnotInRange;
             }
-            vrec.srcDescs.add(new Vrec.SrcDesc(vrec.srcPN, vrec.state));
         } catch (NumberFormatException ex) {
             vrec.state = Vrec.State.FloatingFormatError;
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ex) {
             vrec.state = Vrec.State.RW5FormatError;
         }
+        vrec.srcVrecs.add(vrec);
         return vrec;
     }
 
     private static void checkNotDriftExceedsLimits(Vrec lastVrec, Vrec vrec) {
         if (vrec.state == Vrec.State.Valid || isXSDVnotInRange(vrec)) {
             if (lastVrec != null) {
-                if ((Math.abs(lastVrec.northing - vrec.northing) > 0.04)
-                        | (Math.abs(lastVrec.easting - vrec.easting) > 0.04)
-                        | (Math.abs(lastVrec.elevation - vrec.elevation) > 0.06)) {
+                vrec.driftExceedsLimitY = (Math.abs(lastVrec.northing - vrec.northing) > 0.04);
+                vrec.driftExceedsLimitX = Math.abs(lastVrec.easting - vrec.easting) > 0.04;
+                vrec.driftExceedsLimitZ = Math.abs(lastVrec.elevation - vrec.elevation) > 0.06;
+                if (vrec.driftExceedsLimitY | vrec.driftExceedsLimitX | vrec.driftExceedsLimitZ) {
                     vrec.state = Vrec.State.DriftExceedsLimits;
                 }
             }
@@ -167,7 +170,7 @@ public class ProcessData {
             vrec.elevation += vr.elevation;
             vrec.satsMin = Math.min(vrec.satsMin, vr.sats);
             vrec.satsMax = Math.max(vrec.satsMax, vr.sats);
-            vrec.srcDescs.add(new Vrec.SrcDesc(vr.srcPN, vr.state));
+            vrec.srcVrecs.add(vr);
         }
         vrec.easting /= vrec.numberOfMeasurements;
         vrec.northing /= vrec.numberOfMeasurements;

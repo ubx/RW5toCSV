@@ -33,19 +33,9 @@ public class Vrec {
         },
         DriftExceedsLimits {
             public String toString() {
-                return "Drift Exceeds Limits";
+                return "Drift %s%s%s Exceeds Limits";
             }
         };
-    }
-
-    protected static class SrcDesc {
-        String name;
-        State state;
-
-        SrcDesc(String name, State state) {
-            this.name = name;
-            this.state = state;
-        }
     }
 
     protected double easting;
@@ -61,6 +51,11 @@ public class Vrec {
     protected String time;
     protected State state;
     protected String srcPN;
+    // additional variables
     protected double distTopPrev = 0.0;
-    protected List<SrcDesc> srcDescs = new ArrayList<>();
+    protected List<Vrec> srcVrecs = new ArrayList<>();
+    protected boolean driftExceedsLimitX;
+    protected boolean driftExceedsLimitY;
+    protected boolean driftExceedsLimitZ;
+
 }
