@@ -69,8 +69,9 @@ public class ProcessData {
 
     private static boolean isError(Vrec vrec) {
         for (Vrec.SrcDesc desc : vrec.srcDescs) {
-            if ((desc.state == Vrec.State.DriftExceedsLimits) || isXSDVnotInRange(vrec))
+            if (desc.state == Vrec.State.DriftExceedsLimits || desc.state == Vrec.State.HSDVandVSDVnotInRange || desc.state == Vrec.State.HSDVnotInRange || desc.state == Vrec.State.VSDVnotInRange) {
                 return true;
+            }
         }
         return false;
     }
