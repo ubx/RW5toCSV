@@ -47,6 +47,11 @@ class RA5toCSVTest {
     private static final String Issue7_TXT = TESTDATA + "/test-04.txt";
     private static final String Issue7_REF_TXT = TESTDATA + "/test-04-ref.txt";
 
+    private static final String Issue8_RW5 = TESTDATA + "/test-05.rw5";
+    private static final String Issue8_CSV = TESTDATA + "/test-05.csv";
+    private static final String Issue8_TXT = TESTDATA + "/test-05.txt";
+    private static final String Issue8_REF_TXT = TESTDATA + "/test-05-ref.txt";
+
     @Test
     void basicTest() throws IOException {
         deleteQuietly(new File(BERNECK_CSV));
@@ -99,6 +104,13 @@ class RA5toCSVTest {
         deleteQuietly(new File(Issue7_CSV));
         RA5toCSV.main(new String[]{"-r", Issue7_RW5, "-t", Issue7_TXT, "-c", Issue7_CSV});
         getaVoid(Issue7_TXT, Issue7_REF_TXT);
+    }
+    @Test
+    void issue8_Test() throws IOException {
+        deleteQuietly(new File(Issue8_TXT));
+        deleteQuietly(new File(Issue8_CSV));
+        RA5toCSV.main(new String[]{"-r", Issue8_RW5, "-t", Issue8_TXT, "-c", Issue8_CSV});
+        getaVoid(Issue8_TXT, Issue8_REF_TXT);
     }
 
     private void getaVoid(String file, String file2) throws IOException {
