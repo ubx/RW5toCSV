@@ -8,15 +8,18 @@ public class Vrec {
     protected enum State {
 
         Valid,
+
         HSDVandVSDVnotInRange {
             public String toString() {
                 return "HSDV and VSDV not in Range";
             }
-        }, HSDVnotInRange {
+        },
+        HSDVnotInRange {
             public String toString() {
                 return "HSDV not in Range";
             }
-        }, VSDVnotInRange {
+        },
+        VSDVnotInRange {
             public String toString() {
                 return "VSDV not in Range";
             }
@@ -35,7 +38,7 @@ public class Vrec {
             public String toString() {
                 return "Drift %s%s%s Exceeds Limits";
             }
-        };
+        }
     }
 
     protected double easting;
@@ -52,8 +55,7 @@ public class Vrec {
     protected State state;
     protected String srcPN;
     // additional variables
-    protected double distTopPrev = 0.0;
-    protected List<Vrec> srcVrecs = new ArrayList<>();
+    protected final List<Vrec> srcVrecs = new ArrayList<>();
     protected boolean driftExceedsLimitX;
     protected boolean driftExceedsLimitY;
     protected boolean driftExceedsLimitZ;

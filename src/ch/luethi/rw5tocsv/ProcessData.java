@@ -9,6 +9,12 @@ public class ProcessData {
     private static final DecimalFormat form3 = new DecimalFormat("0.000");
     private static final DecimalFormat form3Error = new DecimalFormat("0.***");
     private static final String SEP = ",";
+    private static final double HSDV_LIM = 0.04;
+    private static final double VSDV_LIM = 0.06;
+    private static final double NORHING_LIM = 0.04;
+    private static final double EASTING_LIM = 0.04;
+    private static final double ELEVATION_LIM = 0.06;
+    private static final double POINT_LIM = 0.5;
     private static List<Vrec> vRecs = null;
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
@@ -18,8 +24,7 @@ public class ProcessData {
             Vrec vrec = getLastVrec(rrec);
             if (vRecs.size() > 0) {
                 if ((vrec.state == Vrec.State.Valid) || isXSDVnotInRange(vrec)) {
-                    vrec.distTopPrev = distance(getLastVrec(), vrec); // todo -- for test only
-                    if ((distance(getLastVrec(), vrec) < 0.5)) {
+                    if ((distance(getLastVrec(), vrec) < POINT_LIM)) {
                         checkNotDriftExceedsLimits(getLastVrec(), vrec);
                         vRecsShort.add(vrec);
                         continue;
@@ -125,11 +130,11 @@ public class ProcessData {
             vrec.date = rrec.dt.substring(4);
             vrec.time = rrec.tm.substring(4);
             // valid ?
-            if ((vrec.hsdv < 0.04) & (vrec.vsdv < 0.06)) {
+            if ((vrec.hsdv < HSDV_LIM) & (vrec.vsdv < VSDV_LIM)) {
                 vrec.state = Vrec.State.Valid;
-            } else if ((vrec.hsdv >= 0.04) & (vrec.vsdv >= 0.06)) {
+            } else if ((vrec.hsdv >= HSDV_LIM) & (vrec.vsdv >= VSDV_LIM)) {
                 vrec.state = Vrec.State.HSDVandVSDVnotInRange;
-            } else if (vrec.hsdv >= 0.04) {
+            } else if (vrec.hsdv >= HSDV_LIM) {
                 vrec.state = Vrec.State.HSDVnotInRange;
             } else {
                 vrec.state = Vrec.State.VSDVnotInRange;
@@ -146,9 +151,9 @@ public class ProcessData {
     private static void checkNotDriftExceedsLimits(Vrec lastVrec, Vrec vrec) {
         if (vrec.state == Vrec.State.Valid || isXSDVnotInRange(vrec)) {
             if (lastVrec != null) {
-                vrec.driftExceedsLimitY = (Math.abs(lastVrec.northing - vrec.northing) > 0.04);
-                vrec.driftExceedsLimitX = Math.abs(lastVrec.easting - vrec.easting) > 0.04;
-                vrec.driftExceedsLimitZ = Math.abs(lastVrec.elevation - vrec.elevation) > 0.06;
+                vrec.driftExceedsLimitY = (Math.abs(lastVrec.northing - vrec.northing) > NORHING_LIM);
+                vrec.driftExceedsLimitX = Math.abs(lastVrec.easting - vrec.easting) > EASTING_LIM;
+                vrec.driftExceedsLimitZ = Math.abs(lastVrec.elevation - vrec.elevation) > ELEVATION_LIM;
                 if (vrec.driftExceedsLimitY | vrec.driftExceedsLimitX | vrec.driftExceedsLimitZ) {
                     vrec.state = Vrec.State.DriftExceedsLimits;
                 }

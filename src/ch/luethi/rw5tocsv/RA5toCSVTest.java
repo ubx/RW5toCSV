@@ -1,7 +1,5 @@
 package ch.luethi.rw5tocsv;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -48,14 +46,6 @@ class RA5toCSVTest {
     private static final String Issue7_CSV = TESTDATA + "/test-04.csv";
     private static final String Issue7_TXT = TESTDATA + "/test-04.txt";
     private static final String Issue7_REF_TXT = TESTDATA + "/test-04-ref.txt";
-
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
 
     @Test
     void basicTest() throws IOException {
