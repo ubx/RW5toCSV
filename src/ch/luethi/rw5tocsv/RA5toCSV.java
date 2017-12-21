@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FilenameUtils;
 
 import static java.lang.System.exit;
 
@@ -18,7 +19,7 @@ public class RA5toCSV {
     private static final String CSV = "c";
     private static final String TXT = "t";
 
-    private static String rw5file, csvfile, txtfile;
+    private static String rw5FileName, csvFileName, txtFileName;
 
     private enum Mode {Start, GS, HSDV, DT, TM}
 
@@ -27,8 +28,8 @@ public class RA5toCSV {
         CommandLineParser parser = new DefaultParser();
         Options options = new Options();
         options.addRequiredOption(RW5, "RW5 input file", true, "RW5 file to extract data");
-        options.addRequiredOption(CSV, "CSV output file", true, "CSV to write data");
-        options.addOption(TXT, "TXT output file", true, "optional text file to write comments");
+        options.addOption(CSV, "CSV output file", true, "csv file to write data, optional. If not specified the output is <file-name>.csv in the same directory as the input file");
+        options.addOption(TXT, "TXT output file", true, "text file to write comments, optional. If not specified the output is <file-name>.txt in the same directory as the input file");
 
         CommandLine cmd;
 
@@ -36,20 +37,27 @@ public class RA5toCSV {
         formatter.setWidth(200);
         try {
             cmd = parser.parse(options, args);
-            rw5file = cmd.getOptionValue(RW5);
-            csvfile = cmd.getOptionValue(CSV);
-            if (cmd.hasOption(TXT)) {
-                txtfile = cmd.getOptionValue(TXT);
+            rw5FileName = cmd.getOptionValue(RW5);
+            csvFileName = cmd.getOptionValue(CSV);
+            if (cmd.hasOption(CSV)) {
+                csvFileName = cmd.getOptionValue(CSV);
             } else {
-                txtfile = null;
+                csvFileName = null;
+                csvFileName = getFullPathWithBaseName() + ".csv";
             }
-
+            if (cmd.hasOption(TXT)) {
+                txtFileName = cmd.getOptionValue(TXT);
+            } else {
+                txtFileName = null;
+                txtFileName = getFullPathWithBaseName() + ".txt";
+            }
         } catch (ParseException e) {
             formatter.printHelp("java -jar RW5toCSV.jar args", options);
             exit(1);
         }
 
-        Scanner scanner = new Scanner(new File(rw5file));
+
+        Scanner scanner = new Scanner(new File(rw5FileName));
         Mode mode = Mode.Start;
         List<Rrec> rrecs = new ArrayList<>();
         Rrec lastRrec = null;
@@ -98,21 +106,25 @@ public class RA5toCSV {
         List<String> csvs = ProcessData.getCSVRecs(rrecs);
 
         // Write csv file
-        BufferedWriter csvOut = new BufferedWriter(new FileWriter(new File(csvfile)));
+        BufferedWriter csvOut = new BufferedWriter(new FileWriter(new File(csvFileName)));
         for (String l : csvs) {
             csvOut.write(l + "\n");
         }
         csvOut.close();
 
         // write txt file if given (ProcessData.getCSVRecs must be called before !)(
-        if (txtfile != null) {
+        if (txtFileName != null) {
             List<String> txts = ProcessData.getCSVRecsWithComment();
-            BufferedWriter txtOut = new BufferedWriter(new FileWriter(new File(txtfile)));
+            BufferedWriter txtOut = new BufferedWriter(new FileWriter(new File(txtFileName)));
             for (String l : txts) {
                 txtOut.write(l + "\n");
             }
             txtOut.close();
         }
+    }
+
+    private static String getFullPathWithBaseName() {
+        return FilenameUtils.getFullPath(rw5FileName) + FilenameUtils.getBaseName(rw5FileName);
     }
 
 }

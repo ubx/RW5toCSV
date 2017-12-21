@@ -113,6 +113,16 @@ class RA5toCSVTest {
         getaVoid(Issue8_TXT, Issue8_REF_TXT);
     }
 
+    @Test
+    void issue9_Test() throws IOException {
+        deleteQuietly(new File(BERNECK_CSV));
+        deleteQuietly(new File(BERNECK_TXT));
+        RA5toCSV.main(new String[]{"-r", BERNECK_RW5});
+        getaVoid(BERNECK_CSV, BERNECK_REF_CSV);
+        getaVoid(BERNECK_TXT, BERNECK_REF_TXT);
+    }
+
+
     private void getaVoid(String file, String file2) throws IOException {
         assertTrue(contentEquals(new File(file), new File(file2)), file + "," + file2 + THE_FILES_DIFFER);
     }
