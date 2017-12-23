@@ -11,6 +11,9 @@ public class RW5Parser {
 
     private enum Mode {Start, GS, HSDV, DT, TM}
 
+    private static String userDefined = null;
+    private static String rtkMethod = null;
+
     public static List<Rrec> getRrecs(String rw5FileName) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(rw5FileName));
         Mode mode = Mode.Start;
@@ -22,11 +25,16 @@ public class RW5Parser {
             if (line.length() == 0) continue; // skip empty line
             if (line.startsWith("--GS,")) {
                 mode = Mode.GS;
+            } else if (line.startsWith("--User Defined:")) {
+                userDefined = line;
+            } else if (line.startsWith("--RTK Method:")) {
+                rtkMethod = line;
             }
+
             switch (mode) {
                 case GS:
                     if (lastRrec != null) {
-                        rrecs.add(lastRrec);
+                        addLastRrec(rrecs, lastRrec);
                     }
                     lastRrec = new Rrec();
                     lastRrec.gs = line;
@@ -54,9 +62,15 @@ public class RW5Parser {
             }
         }
         if (lastRrec != null) {
-            rrecs.add(lastRrec);
+            addLastRrec(rrecs, lastRrec);
         }
         return rrecs;
+    }
+
+    private static void addLastRrec(List<Rrec> rrecs, Rrec lastRrec) {
+        lastRrec.userDefined = userDefined;
+        lastRrec.rtkMethod = rtkMethod;
+        rrecs.add(lastRrec);
     }
 
 }

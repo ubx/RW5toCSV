@@ -38,7 +38,9 @@ public class Vrec {
             public String toString() {
                 return "Drift %s%s%s Exceeds Limits";
             }
-        }
+        },
+        InvalidRTKNetwork,
+        MismatchbetweenCoordinateSystem
     }
 
     protected double easting;
