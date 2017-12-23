@@ -8,7 +8,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import static java.lang.System.exit;
 
-public class RA5toCSV {
+public class RW5toCSV {
 
     private static final String RW5 = "r";
     private static final String CSV = "c";

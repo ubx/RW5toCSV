@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: ch.luethi.rw5tocsv.RA5toCSV
+Main-Class: ch.luethi.rw5tocsv.RW5toCSV
 

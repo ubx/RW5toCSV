@@ -61,7 +61,7 @@ class RA5toCSVTest {
     void basicTest() throws IOException {
         deleteQuietly(new File(BERNECK_CSV));
         deleteQuietly(new File(BERNECK_TXT));
-        RA5toCSV.main(new String[]{"-r", BERNECK_RW5, "-c", BERNECK_CSV, "-t", BERNECK_TXT});
+        RW5toCSV.main(new String[]{"-r", BERNECK_RW5, "-c", BERNECK_CSV, "-t", BERNECK_TXT});
         getaVoid(BERNECK_CSV, BERNECK_REF_CSV);
         getaVoid(BERNECK_TXT, BERNECK_REF_TXT);
     }
@@ -69,21 +69,21 @@ class RA5toCSVTest {
     @Test
     void formatErrorTest() throws IOException {
         deleteQuietly(new File(FORMARERROR_CSV));
-        RA5toCSV.main(new String[]{"-r", FORMARERROR_RW5, "-c", FORMARERROR_CSV});
+        RW5toCSV.main(new String[]{"-r", FORMARERROR_RW5, "-c", FORMARERROR_CSV});
         getaVoid(FORMARERROR_CSV, FORMARERROR_REF_CSV);
     }
 
     @Test
     void FloatingFormatErrorTest() throws IOException {
         deleteQuietly(new File(FloatingFormatError_CSV));
-        RA5toCSV.main(new String[]{"-r", FloatingFormatError_RW5, "-c", FloatingFormatError_CSV});
+        RW5toCSV.main(new String[]{"-r", FloatingFormatError_RW5, "-c", FloatingFormatError_CSV});
         getaVoid(FloatingFormatError_CSV, FloatingFormatError_REF_CSV);
     }
 
     @Test
     void DriftExceedsLimitsTest() throws IOException {
         deleteQuietly(new File(DriftExceedsLimits_TXT));
-        RA5toCSV.main(new String[]{"-r", DriftExceedsLimits_RW5, "-t", DriftExceedsLimits_TXT, "-c", DriftExceedsLimits_CSV});
+        RW5toCSV.main(new String[]{"-r", DriftExceedsLimits_RW5, "-t", DriftExceedsLimits_TXT, "-c", DriftExceedsLimits_CSV});
         getaVoid(DriftExceedsLimits_TXT, DriftExceedsLimits_REF_TXT);
     }
 
@@ -91,7 +91,7 @@ class RA5toCSVTest {
     void issue5_Test() throws IOException {
         deleteQuietly(new File(Issue5_TXT));
         deleteQuietly(new File(Issue5_CSV));
-        RA5toCSV.main(new String[]{"-r", Issue5_RW5, "-t", Issue5_TXT, "-c", Issue5_CSV});
+        RW5toCSV.main(new String[]{"-r", Issue5_RW5, "-t", Issue5_TXT, "-c", Issue5_CSV});
         getaVoid(Issue5_TXT, Issue5_REF_TXT);
     }
 
@@ -99,7 +99,7 @@ class RA5toCSVTest {
     void issue6_Test() throws IOException {
         deleteQuietly(new File(Issue6_TXT));
         deleteQuietly(new File(Issue6_CSV));
-        RA5toCSV.main(new String[]{"-r", Issue6_RW5, "-t", Issue6_TXT, "-c", Issue6_CSV});
+        RW5toCSV.main(new String[]{"-r", Issue6_RW5, "-t", Issue6_TXT, "-c", Issue6_CSV});
         getaVoid(Issue6_TXT, Issue6_REF_TXT);
     }
 
@@ -107,7 +107,7 @@ class RA5toCSVTest {
     void issue7_Test() throws IOException {
         deleteQuietly(new File(Issue7_TXT));
         deleteQuietly(new File(Issue7_CSV));
-        RA5toCSV.main(new String[]{"-r", Issue7_RW5, "-t", Issue7_TXT, "-c", Issue7_CSV});
+        RW5toCSV.main(new String[]{"-r", Issue7_RW5, "-t", Issue7_TXT, "-c", Issue7_CSV});
         getaVoid(Issue7_TXT, Issue7_REF_TXT);
     }
 
@@ -115,7 +115,7 @@ class RA5toCSVTest {
     void issue8_Test() throws IOException {
         deleteQuietly(new File(Issue8_TXT));
         deleteQuietly(new File(Issue8_CSV));
-        RA5toCSV.main(new String[]{"-r", Issue8_RW5, "-t", Issue8_TXT, "-c", Issue8_CSV});
+        RW5toCSV.main(new String[]{"-r", Issue8_RW5, "-t", Issue8_TXT, "-c", Issue8_CSV});
         getaVoid(Issue8_TXT, Issue8_REF_TXT);
     }
 
@@ -123,7 +123,7 @@ class RA5toCSVTest {
     void issue9_Test() throws IOException {
         deleteQuietly(new File(BERNECK_CSV));
         deleteQuietly(new File(BERNECK_TXT));
-        RA5toCSV.main(new String[]{"-r", BERNECK_RW5});
+        RW5toCSV.main(new String[]{"-r", BERNECK_RW5});
         getaVoid(BERNECK_CSV, BERNECK_REF_CSV);
         getaVoid(BERNECK_TXT, BERNECK_REF_TXT);
     }
@@ -132,7 +132,7 @@ class RA5toCSVTest {
     void issue10_Test() throws IOException {
         deleteQuietly(new File(Issue9_TXT));
         deleteQuietly(new File(Issue9_CSV));
-        RA5toCSV.main(new String[]{"-r", Issue9_RW5, "-t", Issue9_TXT, "-c", Issue9_CSV});
+        RW5toCSV.main(new String[]{"-r", Issue9_RW5, "-t", Issue9_TXT, "-c", Issue9_CSV});
         getaVoid(Issue9_TXT, Issue9_REF_TXT);
     }
 
