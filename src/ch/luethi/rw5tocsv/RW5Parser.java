@@ -13,31 +13,40 @@ public class RW5Parser {
 
     private static String userDefined = null;
     private static String rtkMethod = null;
+    private static int userDefinedLine;
+    private static int rtkMethodLine;
 
     public static List<Rrec> getRrecs(String rw5FileName) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(rw5FileName));
         Mode mode = Mode.Start;
         List<Rrec> rrecs = new ArrayList<>();
         Rrec lastRrec = null;
+        int lineCnt = 0;
         // Reading each line of file using Scanner class
         while (scanner.hasNextLine()) {
+            lineCnt++;
             String line = scanner.nextLine();
             if (line.length() == 0) continue; // skip empty line
             if (line.startsWith("--GS,")) {
                 mode = Mode.GS;
             } else if (line.startsWith("--User Defined:")) {
                 userDefined = line;
+                userDefinedLine =lineCnt;
             } else if (line.startsWith("--RTK Method:")) {
                 rtkMethod = line;
+                rtkMethodLine = lineCnt;
             }
 
             switch (mode) {
                 case GS:
-                    if (lastRrec != null) {
-                        addLastRrec(rrecs, lastRrec);
-                    }
+                    addLastRrec(rrecs, lastRrec);
                     lastRrec = new Rrec();
                     lastRrec.gs = line;
+                    lastRrec.gsLine = lineCnt;
+                    lastRrec.rtkMethod = rtkMethod;
+                    lastRrec.rtkMethodLine = rtkMethodLine;
+                    lastRrec.userDefined = userDefined;
+                    lastRrec.userDefinedLine = userDefinedLine;
                     mode = Mode.HSDV;
                     break;
                 case HSDV:
@@ -61,16 +70,14 @@ public class RW5Parser {
                     }
             }
         }
-        if (lastRrec != null) {
-            addLastRrec(rrecs, lastRrec);
-        }
+        addLastRrec(rrecs, lastRrec);
         return rrecs;
     }
 
     private static void addLastRrec(List<Rrec> rrecs, Rrec lastRrec) {
-        lastRrec.userDefined = userDefined;
-        lastRrec.rtkMethod = rtkMethod;
-        rrecs.add(lastRrec);
+        if (lastRrec != null) {
+            rrecs.add(lastRrec);
+        }
     }
 
 }

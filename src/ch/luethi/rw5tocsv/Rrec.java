@@ -8,4 +8,7 @@ public class Rrec {
     protected String tm = "";
     protected String userDefined = null;
     protected String rtkMethod = null;
+    protected int gsLine;
+    protected int userDefinedLine;
+    protected int rtkMethodLine;
 }
