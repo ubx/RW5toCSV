@@ -7,7 +7,6 @@ import java.util.List;
 public class ProcessData {
 
     private static final DecimalFormat form3 = new DecimalFormat("0.000");
-    private static final DecimalFormat form3Error = new DecimalFormat("0.***");
     private static final String SEP = ",";
     private static final double HSDV_LIM = 0.04;
     private static final double VSDV_LIM = 0.06;
@@ -190,7 +189,10 @@ public class ProcessData {
     }
 
     private static String f3(double val, boolean error) {
-        if (error) return form3Error.format(val);
+        if (error) {
+            String s = form3.format(val);
+            return s.substring(0, s.length() - 3) + "***";
+        }
         return f3(val);
     }
 
@@ -199,7 +201,10 @@ public class ProcessData {
     }
 
     private static String f3(float val, boolean error) {
-        if (error) return form3Error.format(val);
+        if (error) {
+            String s = form3.format(val);
+            return s.substring(0, s.length() - 3) + "***";
+        }
         return f3(val);
     }
 
