@@ -21,6 +21,7 @@ public class ProcessData {
         List<Vrec> vRecsShort = new ArrayList<>();
         for (Rrec rrec : rRecs) {
             Vrec vrec = getLastVrec(rrec);
+            checkCoordinate(vrec, rrec);
             if (vRecs.size() > 0) {
                 if ((vrec.state == Vrec.State.Valid) || isXSDVnotInRange(vrec)) {
                     if ((distance(getLastVrec(), vrec) < POINT_LIM)) {
@@ -44,10 +45,11 @@ public class ProcessData {
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
-                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + (vrec.state == Vrec.State.Valid ? "" : " *** " + vrec.state + " ***"));
+                    + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + getErrorText(vrec));
         }
         return csvRecs;
     }
+
 
 
     public static List<String> getCSVRecsWithComment() {
@@ -58,7 +60,7 @@ public class ProcessData {
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.numberOfMeasurements + " / SATS: " + String.format("%02d-%02d",vrec.satsMin,vrec.satsMax)
-                    + " / " + vrec.date + " " + vrec.time + getSrcPNs(vrec));
+                    + " / " + vrec.date + " " + vrec.time + getErrorText2(vrec) + getSrcPNs(vrec));
         }
         return csvRecs;
     }
@@ -183,6 +185,37 @@ public class ProcessData {
         vrec.elevation /= vrec.numberOfMeasurements;
     }
 
+
+    private static void checkCoordinate(Vrec vrec, Rrec rrec) {
+        if (rrec.rtkMethod.contains("LHN95")) {
+            vrec.coordinateState = Vrec.CoordinateState.InvalidRTKNetwork;
+        } else if ((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) &
+                (vrec.northing < 1000000.0)) {
+            vrec.coordinateState = Vrec.CoordinateState.OK;
+        } else if ((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) &
+                (vrec.northing > 1000000.0)) {
+            vrec.coordinateState = Vrec.CoordinateState.OK;
+        } else {
+            vrec.coordinateState = Vrec.CoordinateState.MismatchbetweenCoordinateSystem;
+            String t[] = rrec.rtkMethod.split("_");
+            vrec.rtkMethod = t[t.length-1];
+            t= rrec.userDefined.split("/");
+            vrec.coordSys = t[t.length-1];
+            vrec.coord6dec = vrec.northing < 1000000.0;
+        }
+    }
+
+    private static String getErrorText(Vrec vrec) {
+        return (vrec.state == Vrec.State.Valid & vrec.coordinateState == Vrec.CoordinateState.OK) ? "" : " *** "
+                + (vrec.coordinateState != Vrec.CoordinateState.OK ? ((vrec.coordinateState == Vrec.CoordinateState.MismatchbetweenCoordinateSystem ? String.format(vrec.coordinateState.toString(),
+                vrec.coordSys, vrec.rtkMethod, vrec.coord6dec ? "6" : "7") : vrec.coordinateState.toString())) : vrec.state) + " ***";
+    }
+
+    private static String getErrorText2(Vrec vrec) {
+        return (vrec.state == Vrec.State.Valid & vrec.coordinateState == Vrec.CoordinateState.OK) ? "" : (vrec.coordinateState == Vrec.CoordinateState.OK ? "" :
+                " " + (vrec.coordinateState == Vrec.CoordinateState.MismatchbetweenCoordinateSystem ? String.format(vrec.coordinateState.toString(),
+                        vrec.coordSys, vrec.rtkMethod, vrec.coord6dec ? "6" : "7") : vrec.coordinateState.toString()));
+    }
 
     private static String f3(double val) {
         return form3.format(val);

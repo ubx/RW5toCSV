@@ -38,9 +38,22 @@ public class Vrec {
             public String toString() {
                 return "Drift %s%s%s Exceeds Limits";
             }
+        }
+    }
+
+    protected enum CoordinateState {
+
+        OK,
+        InvalidRTKNetwork {
+            public String toString() {
+                return "Invalid RTK Network: VRS_GISGEO_LV95LHN95";
+            }
         },
-        InvalidRTKNetwork,
-        MismatchbetweenCoordinateSystem
+        MismatchbetweenCoordinateSystem {
+            public String toString() {
+                return "Mismatch between Coordinate System (%s), RTK Network (%s) and Coordinate Format %s decimals";
+            }
+        }
     }
 
     protected double easting;
@@ -55,11 +68,15 @@ public class Vrec {
     protected String date;
     protected String time;
     protected State state;
+    protected CoordinateState coordinateState;
     protected String srcPN;
     // additional variables
     protected final List<Vrec> srcVrecs = new ArrayList<>();
     protected boolean driftExceedsLimitX;
     protected boolean driftExceedsLimitY;
     protected boolean driftExceedsLimitZ;
+    protected boolean coord6dec;
+    protected String rtkMethod;
+    protected String coordSys;
 
 }
