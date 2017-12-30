@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessData {
+class ProcessData {
 
     private static final DecimalFormat form3 = new DecimalFormat("0.000");
     private static final String SEP = ",";
@@ -14,6 +14,7 @@ public class ProcessData {
     private static final double EASTING_LIM = 0.04;
     private static final double ELEVATION_LIM = 0.06;
     private static final double POINT_LIM = 0.5;
+    private static final double N_DEC7_LIMIT = 1000000.0;
     private static List<Vrec> vRecs = null;
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
@@ -197,10 +198,10 @@ public class ProcessData {
 
         if (rrec.userDefined.length() == 0) return;
         if ((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) &
-                (vrec.northing < 1000000.0)) {
+                (vrec.northing < N_DEC7_LIMIT)) {
             vrec.coordinateState = Vrec.CoordinateState.OK;
         } else if ((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) &
-                (vrec.northing > 1000000.0)) {
+                (vrec.northing > N_DEC7_LIMIT)) {
             vrec.coordinateState = Vrec.CoordinateState.OK;
         } else {
             vrec.coordinateState = Vrec.CoordinateState.MismatchbetweenCoordinateSystem;
@@ -208,7 +209,7 @@ public class ProcessData {
             vrec.rtkMethod = t[t.length - 1];
             t = rrec.userDefined.split("/");
             vrec.coordSys = t[t.length - 1];
-            vrec.coord6dec = vrec.northing < 1000000.0;
+            vrec.coord6dec = vrec.northing < N_DEC7_LIMIT;
         }
     }
 

@@ -56,27 +56,29 @@ public class Vrec {
         }
     }
 
-    protected double easting;
-    protected double northing;
-    protected float elevation;
-    protected float hsdv;
-    protected float vsdv;
+    double easting;
+    double northing;
+    float elevation;
+    float hsdv;
+    float vsdv;
 
     // these value are additions fot the text output
-    protected int numberOfMeasurements;
-    protected int sats, satsMin, satsMax;
-    protected String date;
-    protected String time;
-    protected State state;
-    protected CoordinateState coordinateState;
-    protected String srcPN;
+    int numberOfMeasurements;
+    int sats;
+    int satsMin;
+    int satsMax;
+    String date;
+    String time;
+    State state;
+    CoordinateState coordinateState;
+    String srcPN;
     // additional variables
-    protected final List<Vrec> srcVrecs = new ArrayList<>();
-    protected boolean driftExceedsLimitX;
-    protected boolean driftExceedsLimitY;
-    protected boolean driftExceedsLimitZ;
-    protected boolean coord6dec;
-    protected String rtkMethod;
-    protected String coordSys;
+    final List<Vrec> srcVrecs = new ArrayList<>();
+    boolean driftExceedsLimitX;
+    boolean driftExceedsLimitY;
+    boolean driftExceedsLimitZ;
+    boolean coord6dec;
+    String rtkMethod;
+    String coordSys;
 
 }
