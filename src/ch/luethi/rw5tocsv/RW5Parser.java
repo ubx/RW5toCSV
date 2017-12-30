@@ -11,12 +11,11 @@ public class RW5Parser {
 
     private enum Mode {Start, GS, HSDV, DT, TM}
 
-    private static String userDefined = null;
-    private static String rtkMethod = null;
-    private static int userDefinedLine;
-    private static int rtkMethodLine;
-
     public static List<Rrec> getRrecs(String rw5FileName) throws FileNotFoundException {
+        String userDefined= "";
+        String rtkMethod = "";
+        int userDefinedLine = 0;
+        int rtkMethodLine = 0;
         Scanner scanner = new Scanner(new File(rw5FileName));
         Mode mode = Mode.Start;
         List<Rrec> rrecs = new ArrayList<>();

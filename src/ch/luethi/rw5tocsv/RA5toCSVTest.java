@@ -52,10 +52,10 @@ class RA5toCSVTest {
     private static final String Issue8_TXT = TESTDATA + "/test-05.txt";
     private static final String Issue8_REF_TXT = TESTDATA + "/test-05-ref.txt";
 
-    private static final String Issue9_RW5 = TESTDATA + "/test-06.rw5";
-    private static final String Issue9_CSV = TESTDATA + "/test-06.csv";
-    private static final String Issue9_TXT = TESTDATA + "/test-06.txt";
-    private static final String Issue9_REF_TXT = TESTDATA + "/test-06-ref.txt";
+    private static final String Issue10_RW5 = TESTDATA + "/test-06.rw5";
+    private static final String Issue10_CSV = TESTDATA + "/test-06.csv";
+    private static final String Issue10_TXT = TESTDATA + "/test-06.txt";
+    private static final String Issue10_REF_TXT = TESTDATA + "/test-06-ref.txt";
 
     private static final String Issue11_RW5 = TESTDATA + "/test-07.rw5";
     private static final String Issue11_CSV = TESTDATA + "/test-07.csv";
@@ -135,10 +135,10 @@ class RA5toCSVTest {
 
     @Test
     void issue10_Test() throws IOException {
-        deleteQuietly(new File(Issue9_TXT));
-        deleteQuietly(new File(Issue9_CSV));
-        RW5toCSV.main(new String[]{"-r", Issue9_RW5, "-t", Issue9_TXT, "-c", Issue9_CSV});
-        getaVoid(Issue9_TXT, Issue9_REF_TXT);
+        deleteQuietly(new File(Issue10_TXT));
+        deleteQuietly(new File(Issue10_CSV));
+        RW5toCSV.main(new String[]{"-r", Issue10_RW5, "-t", Issue10_TXT, "-c", Issue10_CSV});
+        getaVoid(Issue10_TXT, Issue10_REF_TXT);
     }
 
     @Test

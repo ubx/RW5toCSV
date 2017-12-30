@@ -187,9 +187,16 @@ public class ProcessData {
 
 
     private static void checkCoordinate(Vrec vrec, Rrec rrec) {
+        vrec.coordinateState = Vrec.CoordinateState.OK;
         if (rrec.rtkMethod.contains("LHN95")) {
             vrec.coordinateState = Vrec.CoordinateState.InvalidRTKNetwork;
-        } else if ((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) &
+            String t[] = rrec.rtkMethod.split("_");
+            vrec.rtkMethod = t[t.length - 1];
+            return;
+        }
+
+        if (rrec.userDefined.length() == 0) return;
+        if ((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) &
                 (vrec.northing < 1000000.0)) {
             vrec.coordinateState = Vrec.CoordinateState.OK;
         } else if ((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) &
@@ -198,9 +205,9 @@ public class ProcessData {
         } else {
             vrec.coordinateState = Vrec.CoordinateState.MismatchbetweenCoordinateSystem;
             String t[] = rrec.rtkMethod.split("_");
-            vrec.rtkMethod = t[t.length-1];
-            t= rrec.userDefined.split("/");
-            vrec.coordSys = t[t.length-1];
+            vrec.rtkMethod = t[t.length - 1];
+            t = rrec.userDefined.split("/");
+            vrec.coordSys = t[t.length - 1];
             vrec.coord6dec = vrec.northing < 1000000.0;
         }
     }

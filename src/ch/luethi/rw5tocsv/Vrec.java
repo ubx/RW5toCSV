@@ -46,7 +46,7 @@ public class Vrec {
         OK,
         InvalidRTKNetwork {
             public String toString() {
-                return "Invalid RTK Network: VRS_GISGEO_LV95LHN95";
+                return "Invalid RTK Network: LV95LHN95";
             }
         },
         MismatchbetweenCoordinateSystem {
