@@ -196,14 +196,10 @@ class ProcessData {
             return;
         }
 
-        if (rrec.userDefined.length() == 0) return;
-        if ((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) &
-                (vrec.northing < N_DEC7_LIMIT)) {
-            vrec.coordinateState = Vrec.CoordinateState.OK;
-        } else if ((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) &
-                (vrec.northing > N_DEC7_LIMIT)) {
-            vrec.coordinateState = Vrec.CoordinateState.OK;
-        } else {
+        if (rrec.userDefined.length() == 0) return; // if no userDefined found!
+
+        if (!((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) & (vrec.northing < N_DEC7_LIMIT)) &&
+                !((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) & (vrec.northing > N_DEC7_LIMIT))) {
             vrec.coordinateState = Vrec.CoordinateState.MismatchbetweenCoordinateSystem;
             String t[] = rrec.rtkMethod.split("_");
             vrec.rtkMethod = t[t.length - 1];
