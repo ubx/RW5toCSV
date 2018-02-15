@@ -19,37 +19,46 @@ class ProcessData {
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
         vRecs = new ArrayList<>();
+        VrecSrc lastVrecS = null;
         for (Rrec rrec : rRecs) {
-            Vrec vrec = getLastVrec(rrec);
-            checkCoordinate(vrec, rrec);
-            if ((vrec.state == Vrec.State.Valid) || isXSDVnotInRange(vrec)) {
-                addVrec(vRecs, vrec);
+            VrecSrc vrecSrc = getLastVrec(rrec);
+            checkCoordinate(vrecSrc, rrec);
+            if ((vrecSrc.state == VrecSrc.State.Valid) || isXSDVnotInRange(vrecSrc)) {
+                //checkNotDriftExceedsLimits(lastVrecS, vrecSrc); // todo -- rework, move to an other place
+                lastVrecS = vrecSrc;
+                addVrec(vRecs, vrecSrc);
             }
         }
+
         List<String> csvRecs = new ArrayList<>();
         int cnt = 1;
         for (Vrec vrec : vRecs) {
+            mergePoints(vrec);
             boolean error = isError(vrec);
+            error = false; // todo -- do not ignore errors
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + getErrorText(vrec));
         }
         return csvRecs;
     }
 
-    private static void addVrec(List<Vrec> vRecs, Vrec vRec) {
-        List<Vrec> vRecsToAdd = vRecs;
-        for (Vrec vRec1 : vRecs) {
-            for (Vrec vrec2 : vRec1.srcVrecs) {
-                if ((distance(vrec2, vRec) < POINT_LIM)) {
-                    //checkNotDriftExceedsLimits(vRec1.srcVrecs.get(vRec1.srcVrecs.size() - 1), vRec); // todo -- that's very likely wrong !!
-                    vRecsToAdd = vRec1.srcVrecs;
-                    average(vRec);
+    private static void addVrec(List<Vrec> vRecs, VrecSrc vrecSrcNew) {
+        boolean nf = false;
+        for (Vrec vrec : vRecs) {
+            for (VrecSrc vrecSrc : vrec.vrecSrcs) {
+                if ((distance(vrecSrc, vrecSrcNew) < POINT_LIM)) {
+                    vrec.vrecSrcs.add(vrecSrcNew);
+                    nf = true;
                     break;
                 }
             }
-            if (vRecsToAdd != vRecs) break;
+            if (nf) break;
         }
-        vRecsToAdd.add(vRec);
+        if (!nf) {
+            Vrec vrecNew = new Vrec();
+            vrecNew.vrecSrcs.add(vrecSrcNew);
+            vRecs.add(vrecNew);
+        }
     }
 
 
@@ -58,9 +67,10 @@ class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
+            error = false; // todo -- do not ignore errors
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
-                    + "  -  #" + vrec.numberOfMeasurements + " / SATS: " + String.format("%02d-%02d",vrec.satsMin,vrec.satsMax)
+                    + "  -  #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
                     + " / " + vrec.date + " " + vrec.time + getErrorText2(vrec) + getSrcPNs(vrec));
         }
         return csvRecs;
@@ -71,28 +81,29 @@ class ProcessData {
     }
 
     private static boolean isError(Vrec vrec) {
-        for (Vrec srcVrec : vrec.srcVrecs) {
-            if (srcVrec.state == Vrec.State.DriftExceedsLimits || srcVrec.state == Vrec.State.HSDVandVSDVnotInRange || srcVrec.state == Vrec.State.HSDVnotInRange || srcVrec.state == Vrec.State.VSDVnotInRange) {
+        for (VrecSrc srcVrecS : vrec.vrecSrcs) {
+            if (srcVrecS.state == VrecSrc.State.DriftExceedsLimits || srcVrecS.state == VrecSrc.State.HSDVandVSDVnotInRange || srcVrecS.state == VrecSrc.State.HSDVnotInRange || srcVrecS.state == VrecSrc.State.VSDVnotInRange) {
                 return true;
             }
         }
+        vrec.state = VrecSrc.State.Valid;
         return false;
     }
 
-    private static boolean isXSDVnotInRange(Vrec vrec) {
-        return vrec.state == Vrec.State.HSDVandVSDVnotInRange || vrec.state == Vrec.State.HSDVnotInRange || vrec.state == Vrec.State.VSDVnotInRange;
+    private static boolean isXSDVnotInRange(VrecSrc vrecS) {
+        return vrecS.state == VrecSrc.State.HSDVandVSDVnotInRange || vrecS.state == VrecSrc.State.HSDVnotInRange || vrecS.state == VrecSrc.State.VSDVnotInRange;
     }
 
     private static String getSrcPNs(Vrec vrec) {
         int ecnt = 0;
         StringBuilder sb = new StringBuilder();
-        for (Vrec srcVrec : vrec.srcVrecs) {
+        for (VrecSrc vrecSrc : vrec.vrecSrcs) {
             if (sb.length() > 0) sb.append(',');
-            sb.append(srcVrec.srcPN);
-            if (srcVrec.state != Vrec.State.Valid) {
-                sb.append('(').append(srcVrec.state == Vrec.State.DriftExceedsLimits
-                        ? String.format(srcVrec.state.toString(), srcVrec.driftExceedsLimitX ? "X":"", srcVrec.driftExceedsLimitY ? "Y":"", srcVrec.driftExceedsLimitZ ? "Z":"")
-                        : srcVrec.state).append(')');
+            sb.append(vrecSrc.srcPN);
+            if (vrecSrc.state != VrecSrc.State.Valid) {
+                sb.append('(').append(vrecSrc.state == VrecSrc.State.DriftExceedsLimits
+                        ? String.format(vrecSrc.state.toString(), vrecSrc.driftExceedsLimitX ? "X":"", vrecSrc.driftExceedsLimitY ? "Y":"", vrecSrc.driftExceedsLimitZ ? "Z":"")
+                        : vrecSrc.state).append(')');
                 ecnt++;
             }
         }
@@ -100,68 +111,76 @@ class ProcessData {
     }
 
 
-    private static Vrec getLastVrec(Rrec rrec) {
-        Vrec vrec = new Vrec();
+    private static VrecSrc getLastVrec(Rrec rrec) {
+        VrecSrc vrecSrc = new VrecSrc();
         String strs[] = rrec.gs.split(",");
         // --GS,PN1,N 1200261.6916,E 2608973.7195,EL583.6008,--
         try {
-            vrec.northing = Double.valueOf(strs[2].split(" ")[1]);
-            vrec.easting = Double.valueOf(strs[3].split(" ")[1]);
-            vrec.elevation = Float.valueOf(strs[4].substring(2));
-            vrec.srcPN = strs[1];
-            vrec.numberOfMeasurements = 1;
+            vrecSrc.northing = Double.valueOf(strs[2].split(" ")[1]);
+            vrecSrc.easting = Double.valueOf(strs[3].split(" ")[1]);
+            vrecSrc.elevation = Float.valueOf(strs[4].substring(2));
+            vrecSrc.srcPN = strs[1];
             // --HSDV:0.011, VSDV:0.014, STATUS:FIXED, SATS:13, AGE:0.6, PDOP:1.853, HDOP:1.100, VDOP:1.491, TDOP:1.116, GDOP:1.479, NSDV
             strs = rrec.hsdv.split(",");
-            vrec.hsdv = Float.valueOf(strs[0].split(":")[1]);
-            vrec.vsdv = Float.valueOf(strs[1].split(":")[1]);
-            vrec.sats = Integer.valueOf(strs[3].split(":")[1]);
-            vrec.satsMin = vrec.sats;
-            vrec.satsMax = vrec.sats;
+            vrecSrc.hsdv = Float.valueOf(strs[0].split(":")[1]);
+            vrecSrc.vsdv = Float.valueOf(strs[1].split(":")[1]);
+            vrecSrc.sats = Integer.valueOf(strs[3].split(":")[1]);
             // --DT10-01-2015
             // --TM00:04:50
-            vrec.date = rrec.dt.substring(4);
-            vrec.time = rrec.tm.substring(4);
+            vrecSrc.date = rrec.dt.substring(4);
+            vrecSrc.time = rrec.tm.substring(4);
             // valid ?
-            if ((vrec.hsdv < HSDV_LIM) & (vrec.vsdv < VSDV_LIM)) {
-                vrec.state = Vrec.State.Valid;
-            } else if ((vrec.hsdv >= HSDV_LIM) & (vrec.vsdv >= VSDV_LIM)) {
-                vrec.state = Vrec.State.HSDVandVSDVnotInRange;
-            } else if (vrec.hsdv >= HSDV_LIM) {
-                vrec.state = Vrec.State.HSDVnotInRange;
+            if ((vrecSrc.hsdv < HSDV_LIM) & (vrecSrc.vsdv < VSDV_LIM)) {
+                vrecSrc.state = VrecSrc.State.Valid;
+            } else if ((vrecSrc.hsdv >= HSDV_LIM) & (vrecSrc.vsdv >= VSDV_LIM)) {
+                vrecSrc.state = VrecSrc.State.HSDVandVSDVnotInRange;
+            } else if (vrecSrc.hsdv >= HSDV_LIM) {
+                vrecSrc.state = VrecSrc.State.HSDVnotInRange;
             } else {
-                vrec.state = Vrec.State.VSDVnotInRange;
+                vrecSrc.state = VrecSrc.State.VSDVnotInRange;
             }
         } catch (NumberFormatException ex) {
-            vrec.state = Vrec.State.FloatingFormatError;
+            vrecSrc.state = VrecSrc.State.FloatingFormatError;
         } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException ex) {
-            vrec.state = Vrec.State.RW5FormatError;
+            vrecSrc.state = VrecSrc.State.RW5FormatError;
         }
-        vrec.srcVrecs.add(vrec);
-        return vrec;
+        return vrecSrc;
     }
 
-    private static void checkNotDriftExceedsLimits(Vrec lastVrec, Vrec vrec) {
-        if (vrec.state == Vrec.State.Valid || isXSDVnotInRange(vrec)) {
-            if (lastVrec != null) {
-                vrec.driftExceedsLimitY = (Math.abs(lastVrec.northing - vrec.northing) > NORHING_LIM);
-                vrec.driftExceedsLimitX = Math.abs(lastVrec.easting - vrec.easting) > EASTING_LIM;
-                vrec.driftExceedsLimitZ = Math.abs(lastVrec.elevation - vrec.elevation) > ELEVATION_LIM;
-                if (vrec.driftExceedsLimitY | vrec.driftExceedsLimitX | vrec.driftExceedsLimitZ) {
-                    vrec.state = Vrec.State.DriftExceedsLimits;
+    private static void checkNotDriftExceedsLimits(VrecSrc lastVrecS, VrecSrc vrecS) {
+        if (vrecS.state == VrecSrc.State.Valid || isXSDVnotInRange(vrecS)) {
+            if (lastVrecS != null) {
+                vrecS.driftExceedsLimitY = (Math.abs(lastVrecS.northing - vrecS.northing) > NORHING_LIM);
+                vrecS.driftExceedsLimitX = Math.abs(lastVrecS.easting - vrecS.easting) > EASTING_LIM;
+                vrecS.driftExceedsLimitZ = Math.abs(lastVrecS.elevation - vrecS.elevation) > ELEVATION_LIM;
+                if (vrecS.driftExceedsLimitY | vrecS.driftExceedsLimitX | vrecS.driftExceedsLimitZ) {
+                    vrecS.state = VrecSrc.State.DriftExceedsLimits;
                 }
             }
         }
     }
 
 
-    private static void average(Vrec vrec) {
-        vrec.numberOfMeasurements = vrec.srcVrecs.size();
-        vrec.satsMax = vrec.sats;
-        vrec.satsMin = vrec.sats;
-        if (vrec.srcVrecs.size() == 0) {
-            return;
-        }
-        for (Vrec vr : vrec.srcVrecs) {
+    private static void mergePoints(Vrec vrec) {
+        vrec.easting = 0;
+        vrec.northing = 0;
+        vrec.elevation = 0;
+        vrec.satsMin = 9999;
+        vrec.satsMax = 0;
+        vrec.hsdv = 0;
+        vrec.vsdv = 0;
+        vrec.coordinateState = Vrec.CoordinateState.OK;
+        vrec.driftExceedsLimitX = false;
+        vrec.driftExceedsLimitZ = false;
+        vrec.driftExceedsLimitY = false;
+        vrec.state = Vrec.State.Valid;
+        vrec.coord6dec = false;
+        vrec.rtkMethod = vrec.vrecSrcs.get(0).rtkMethod;
+        vrec.coordSys = vrec.vrecSrcs.get(0).coordSys;
+        vrec.date = vrec.vrecSrcs.get(0).date;
+        vrec.time = vrec.vrecSrcs.get(0).time;
+
+        for (VrecSrc vr : vrec.vrecSrcs) {
             vrec.easting += vr.easting;
             vrec.northing += vr.northing;
             vrec.elevation += vr.elevation;
@@ -170,43 +189,43 @@ class ProcessData {
             vrec.hsdv = Math.max(vrec.hsdv, vr.hsdv);
             vrec.vsdv = Math.max(vrec.vsdv, vr.vsdv);
         }
-        vrec.easting /= vrec.numberOfMeasurements;
-        vrec.northing /= vrec.numberOfMeasurements;
-        vrec.elevation /= vrec.numberOfMeasurements;
+        vrec.easting /= vrec.getNumberOfMeasurements();
+        vrec.northing /= vrec.getNumberOfMeasurements();
+        vrec.elevation /= vrec.getNumberOfMeasurements();
     }
 
 
-    private static void checkCoordinate(Vrec vrec, Rrec rrec) {
-        vrec.coordinateState = Vrec.CoordinateState.OK;
+    private static void checkCoordinate(VrecSrc vrecSrc, Rrec rrec) {
+        vrecSrc.coordinateState = VrecSrc.CoordinateState.OK;
         if (rrec.rtkMethod.contains("LHN95")) {
-            vrec.coordinateState = Vrec.CoordinateState.InvalidRTKNetwork;
+            vrecSrc.coordinateState = VrecSrc.CoordinateState.InvalidRTKNetwork;
             String t[] = rrec.rtkMethod.split("_");
-            vrec.rtkMethod = t[t.length - 1];
+            vrecSrc.rtkMethod = t[t.length - 1];
             return;
         }
 
         if (rrec.userDefined.length() == 0) return; // if no userDefined found!
 
-        if (!((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) & (vrec.northing < N_DEC7_LIMIT)) &&
-                !((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) & (vrec.northing > N_DEC7_LIMIT))) {
-            vrec.coordinateState = Vrec.CoordinateState.MismatchbetweenCoordinateSystem;
+        if (!((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) & (vrecSrc.northing < N_DEC7_LIMIT)) &&
+                !((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) & (vrecSrc.northing > N_DEC7_LIMIT))) {
+            vrecSrc.coordinateState = VrecSrc.CoordinateState.MismatchbetweenCoordinateSystem;
             String t[] = rrec.rtkMethod.split("_");
-            vrec.rtkMethod = t[t.length - 1];
+            vrecSrc.rtkMethod = t[t.length - 1];
             t = rrec.userDefined.split("/");
-            vrec.coordSys = t[t.length - 1];
-            vrec.coord6dec = vrec.northing < N_DEC7_LIMIT;
+            vrecSrc.coordSys = t[t.length - 1];
+            vrecSrc.coord6dec = vrecSrc.northing < N_DEC7_LIMIT;
         }
     }
 
     private static String getErrorText(Vrec vrec) {
-        return (vrec.state == Vrec.State.Valid & vrec.coordinateState == Vrec.CoordinateState.OK) ? "" : " *** "
-                + (vrec.coordinateState != Vrec.CoordinateState.OK ? ((vrec.coordinateState == Vrec.CoordinateState.MismatchbetweenCoordinateSystem ? String.format(vrec.coordinateState.toString(),
+        return (vrec.state == VrecSrc.State.Valid & vrec.coordinateState == VrecSrc.CoordinateState.OK) ? "" : " *** "
+                + (vrec.coordinateState != VrecSrc.CoordinateState.OK ? ((vrec.coordinateState == VrecSrc.CoordinateState.MismatchbetweenCoordinateSystem ? String.format(vrec.coordinateState.toString(),
                 vrec.coordSys, vrec.rtkMethod, vrec.coord6dec ? "6" : "7") : vrec.coordinateState.toString())) : vrec.state) + " ***";
     }
 
     private static String getErrorText2(Vrec vrec) {
-        return (vrec.state == Vrec.State.Valid & vrec.coordinateState == Vrec.CoordinateState.OK) ? "" : (vrec.coordinateState == Vrec.CoordinateState.OK ? "" :
-                " " + (vrec.coordinateState == Vrec.CoordinateState.MismatchbetweenCoordinateSystem ? String.format(vrec.coordinateState.toString(),
+        return (vrec.state == VrecSrc.State.Valid & vrec.coordinateState == VrecSrc.CoordinateState.OK) ? "" : (vrec.coordinateState == VrecSrc.CoordinateState.OK ? "" :
+                " " + (vrec.coordinateState == VrecSrc.CoordinateState.MismatchbetweenCoordinateSystem ? String.format(vrec.coordinateState.toString(),
                         vrec.coordSys, vrec.rtkMethod, vrec.coord6dec ? "6" : "7") : vrec.coordinateState.toString()));
     }
 
@@ -234,7 +253,7 @@ class ProcessData {
         return f3(val);
     }
 
-    private static double distance(Vrec v0, Vrec v1) {
+    private static double distance(VrecSrc v0, VrecSrc v1) {
         return Math.sqrt(Math.pow(v0.easting - v1.easting, 2) + Math.pow(v0.northing - v1.northing, 2));
     }
 
