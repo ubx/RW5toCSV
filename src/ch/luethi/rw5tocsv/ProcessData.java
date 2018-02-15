@@ -19,13 +19,10 @@ class ProcessData {
 
     public static List<String> getCSVRecs(List<Rrec> rRecs) {
         vRecs = new ArrayList<>();
-        VrecSrc lastVrecS = null;
         for (Rrec rrec : rRecs) {
             VrecSrc vrecSrc = getLastVrec(rrec);
             checkCoordinate(vrecSrc, rrec);
             if ((vrecSrc.state == VrecSrc.State.Valid) || isXSDVnotInRange(vrecSrc)) {
-                //checkNotDriftExceedsLimits(lastVrecS, vrecSrc); // todo -- rework, move to an other place
-                lastVrecS = vrecSrc;
                 addVrec(vRecs, vrecSrc);
             }
         }
@@ -34,8 +31,8 @@ class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             mergePoints(vrec);
+            checkNotDriftExceedsLimits(vrec);
             boolean error = isError(vrec);
-            error = false; // todo -- do not ignore errors
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv) + getErrorText(vrec));
         }
@@ -67,7 +64,6 @@ class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
-            error = false; // todo -- do not ignore errors
             csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
@@ -147,16 +143,22 @@ class ProcessData {
         return vrecSrc;
     }
 
-    private static void checkNotDriftExceedsLimits(VrecSrc lastVrecS, VrecSrc vrecS) {
-        if (vrecS.state == VrecSrc.State.Valid || isXSDVnotInRange(vrecS)) {
-            if (lastVrecS != null) {
-                vrecS.driftExceedsLimitY = (Math.abs(lastVrecS.northing - vrecS.northing) > NORHING_LIM);
-                vrecS.driftExceedsLimitX = Math.abs(lastVrecS.easting - vrecS.easting) > EASTING_LIM;
-                vrecS.driftExceedsLimitZ = Math.abs(lastVrecS.elevation - vrecS.elevation) > ELEVATION_LIM;
-                if (vrecS.driftExceedsLimitY | vrecS.driftExceedsLimitX | vrecS.driftExceedsLimitZ) {
-                    vrecS.state = VrecSrc.State.DriftExceedsLimits;
+    private static void checkNotDriftExceedsLimits(Vrec vrec) {
+        VrecSrc vrecSrcLast = null;
+        for (VrecSrc vrecSrc : vrec.vrecSrcs) {
+            if (vrecSrcLast != null) {
+                if (vrecSrc.state == VrecSrc.State.Valid || isXSDVnotInRange(vrecSrc)) {
+                    if (vrecSrcLast != null) {
+                        vrecSrc.driftExceedsLimitY = (Math.abs(vrecSrcLast.northing - vrecSrc.northing) > NORHING_LIM);
+                        vrecSrc.driftExceedsLimitX = Math.abs(vrecSrcLast.easting - vrecSrc.easting) > EASTING_LIM;
+                        vrecSrc.driftExceedsLimitZ = Math.abs(vrecSrcLast.elevation - vrecSrc.elevation) > ELEVATION_LIM;
+                        if (vrecSrc.driftExceedsLimitY | vrecSrc.driftExceedsLimitX | vrecSrc.driftExceedsLimitZ) {
+                            vrecSrc.state = VrecSrc.State.DriftExceedsLimits;
+                        }
+                    }
                 }
             }
+            vrecSrcLast = vrecSrc;
         }
     }
 
@@ -165,7 +167,7 @@ class ProcessData {
         vrec.easting = 0;
         vrec.northing = 0;
         vrec.elevation = 0;
-        vrec.satsMin = 9999;
+        vrec.satsMin = Integer.MAX_VALUE;
         vrec.satsMax = 0;
         vrec.hsdv = 0;
         vrec.vsdv = 0;
