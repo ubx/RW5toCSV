@@ -12,10 +12,10 @@ class RW5toCSV {
 
     private static final String RW5 = "r";
     private static final String CSV = "c";
-    private static final String TXT = "t";
+    private static final String LOG = "l";
     private static final String VER = "v";
 
-    private static String rw5FileName, csvFileName, txtFileName;
+    private static String rw5FileName, csvFileName, logFileName;
 
     public static void main(String args[]) throws IOException {
 
@@ -23,7 +23,7 @@ class RW5toCSV {
         Options options = new Options();
         options.addOption(RW5, "RW5 input file", true, "RW5 file to extract data");
         options.addOption(CSV, "CSV output file", true, "csv file to write data, optional. If not specified the output is <file-name>.csv in the same directory as the input file");
-        options.addOption(TXT, "TXT output file", true, "text file to write comments, optional. If not specified the output is <file-name>.txt in the same directory as the input file");
+        options.addOption(LOG, "LOG output file", true, "log file to write comments, optional. If not specified the output is <file-name>.log in the same directory as the input file");
         options.addOption(VER, "version of the program", false, "prints the version nummer of the program");
 
         CommandLine cmd;
@@ -43,11 +43,11 @@ class RW5toCSV {
                 csvFileName = null;
                 csvFileName = getFullPathWithBaseName() + ".csv";
             }
-            if (cmd.hasOption(TXT)) {
-                txtFileName = cmd.getOptionValue(TXT);
+            if (cmd.hasOption(LOG)) {
+                logFileName = cmd.getOptionValue(LOG);
             } else {
-                txtFileName = null;
-                txtFileName = getFullPathWithBaseName() + ".txt";
+                logFileName = null;
+                logFileName = getFullPathWithBaseName() + ".log";
             }
             if (rw5FileName == null) throw new ParseException("now arguments specified");
         } catch (ParseException e) {
@@ -68,9 +68,9 @@ class RW5toCSV {
         csvOut.close();
 
         // write txt file if given (ProcessData.getCSVRecs must be called before !)(
-        if (txtFileName != null) {
+        if (logFileName != null) {
             List<String> txts = ProcessData.getCSVRecsWithComment();
-            BufferedWriter txtOut = new BufferedWriter(new FileWriter(new File(txtFileName)));
+            BufferedWriter txtOut = new BufferedWriter(new FileWriter(new File(logFileName)));
             for (String l : txts) {
                 txtOut.write(l + "\n");
             }
