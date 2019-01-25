@@ -15,7 +15,7 @@ class RA5toCSVTest {
     private static final String TESTDATA = "testdata";
     private static final String BERNECK_RW5 = TESTDATA + "/BERNECK.rw5";
     private static final String BERNECK_CSV = TESTDATA + "/BERNECK.csv";
-    private static final String BERNECK_LOG = TESTDATA + "/BERNECK.txt";
+    private static final String BERNECK_LOG = TESTDATA + "/BERNECK.log";
     private static final String BERNECK_REF_CSV = TESTDATA + "/BERNECK-ref.csv";
     private static final String BERNECK_REF_LOG = TESTDATA + "/BERNECK-ref.txt";
 
