@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RA5toCSVTest {
 
     private static final String THE_FILES_DIFFER = " The files differ!";
+    private static final String DIFF_CMD = "meld ";
 
     private static final String TESTDATA = "testdata";
     private static final String BERNECK_RW5 = TESTDATA + "/BERNECK.rw5";
@@ -166,7 +167,7 @@ class RA5toCSVTest {
 
 
     private void getaVoid(String file, String file2) throws IOException {
-        assertTrue(contentEquals(new File(file), new File(file2)), file + "," + file2 + THE_FILES_DIFFER);
+        assertTrue(contentEquals(new File(file), new File(file2)), DIFF_CMD + file + " " + file2 + THE_FILES_DIFFER);
     }
 
 }
