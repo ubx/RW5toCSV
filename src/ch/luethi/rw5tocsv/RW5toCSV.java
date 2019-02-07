@@ -24,7 +24,7 @@ class RW5toCSV {
         options.addOption(RW5, "RW5 input file", true, "RW5 file to extract data");
         options.addOption(CSV, "CSV output file", true, "csv file to write data, optional. If not specified the output is <file-name>.csv in the same directory as the input file");
         options.addOption(LOG, "LOG output file", true, "log file to write comments, optional. If not specified the output is <file-name>.log in the same directory as the input file");
-        options.addOption(VER, "version of the program", false, "prints the version nummer of the program");
+        options.addOption(VER, "version of the program", false, "prints the version number of the program");
 
         CommandLine cmd;
 
