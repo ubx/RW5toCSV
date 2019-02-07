@@ -149,7 +149,7 @@ class ProcessData {
             if (vrecSrcLast != null) {
                 if (vrecSrc.state == VrecSrc.State.Valid || isXSDVnotInRange(vrecSrc)) {
                     if (vrecSrcLast != null) {
-                        vrecSrc.driftExceedsLimitY = (Math.abs(vrecSrcLast.northing - vrecSrc.northing) > NORHING_LIM);
+                        vrecSrc.driftExceedsLimitY = Math.abs(vrecSrcLast.northing - vrecSrc.northing) > NORHING_LIM;
                         vrecSrc.driftExceedsLimitX = Math.abs(vrecSrcLast.easting - vrecSrc.easting) > EASTING_LIM;
                         vrecSrc.driftExceedsLimitZ = Math.abs(vrecSrcLast.elevation - vrecSrc.elevation) > ELEVATION_LIM;
                         if (vrecSrc.driftExceedsLimitY | vrecSrc.driftExceedsLimitX | vrecSrc.driftExceedsLimitZ) {

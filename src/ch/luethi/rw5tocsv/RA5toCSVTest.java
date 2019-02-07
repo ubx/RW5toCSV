@@ -68,6 +68,11 @@ class RA5toCSVTest {
     private static final String Issue12_LOG = TESTDATA + "/P316-KIRCHDORF.txt";
     private static final String Issue12_REF_LOG = TESTDATA + "/P316-KIRCHDORF-ref.txt";
 
+    private static final String Issue12_2_RW5 = TESTDATA + "/P374.rw5";
+    private static final String Issue12_2_CSV = TESTDATA + "/P374.csv";
+    private static final String Issue12_2_LOG = TESTDATA + "/P374.log";
+    private static final String Issue12_2_REF_LOG = TESTDATA + "/P374-ref.log";
+
 
     @Test
     void basicTest() throws IOException {
@@ -163,6 +168,14 @@ class RA5toCSVTest {
         deleteQuietly(new File(Issue12_CSV));
         RW5toCSV.main(new String[]{"-r", Issue12_RW5, "-l", Issue12_LOG, "-c", Issue12_CSV});
         getaVoid(Issue12_LOG, Issue12_REF_LOG);
+    }
+
+    @Test
+    void issue12_2_Test() throws IOException {
+        deleteQuietly(new File(Issue12_2_LOG));
+        deleteQuietly(new File(Issue12_2_CSV));
+        RW5toCSV.main(new String[]{"-r", Issue12_2_RW5, "-l", Issue12_2_LOG, "-c", Issue12_2_CSV});
+        getaVoid(Issue12_2_LOG, Issue12_2_REF_LOG);
     }
 
 
