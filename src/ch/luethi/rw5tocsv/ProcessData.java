@@ -109,7 +109,7 @@ class ProcessData {
 
     private static VrecSrc getLastVrec(Rrec rrec) {
         VrecSrc vrecSrc = new VrecSrc();
-        String strs[] = rrec.gs.split(",");
+        String[] strs = rrec.gs.split(",");
         // --GS,PN1,N 1200261.6916,E 2608973.7195,EL583.6008,--
         try {
             vrecSrc.northing = Double.valueOf(strs[2].split(" ")[1]);
@@ -148,13 +148,11 @@ class ProcessData {
         for (VrecSrc vrecSrc : vrec.vrecSrcs) {
             if (vrecSrcLast != null) {
                 if (vrecSrc.state == VrecSrc.State.Valid || isXSDVnotInRange(vrecSrc)) {
-                    if (vrecSrcLast != null) {
-                        vrecSrc.driftExceedsLimitY = Math.abs(vrecSrcLast.northing - vrecSrc.northing) > NORHING_LIM;
-                        vrecSrc.driftExceedsLimitX = Math.abs(vrecSrcLast.easting - vrecSrc.easting) > EASTING_LIM;
-                        vrecSrc.driftExceedsLimitZ = Math.abs(vrecSrcLast.elevation - vrecSrc.elevation) > ELEVATION_LIM;
-                        if (vrecSrc.driftExceedsLimitY | vrecSrc.driftExceedsLimitX | vrecSrc.driftExceedsLimitZ) {
-                            vrecSrc.state = VrecSrc.State.DriftExceedsLimits;
-                        }
+                    vrecSrc.driftExceedsLimitY = Math.abs(vrecSrcLast.northing - vrecSrc.northing) > NORHING_LIM;
+                    vrecSrc.driftExceedsLimitX = Math.abs(vrecSrcLast.easting - vrecSrc.easting) > EASTING_LIM;
+                    vrecSrc.driftExceedsLimitZ = Math.abs(vrecSrcLast.elevation - vrecSrc.elevation) > ELEVATION_LIM;
+                    if (vrecSrc.driftExceedsLimitY | vrecSrc.driftExceedsLimitX | vrecSrc.driftExceedsLimitZ) {
+                        vrecSrc.state = VrecSrc.State.DriftExceedsLimits;
                     }
                 }
             }
@@ -201,7 +199,7 @@ class ProcessData {
         vrecSrc.coordinateState = VrecSrc.CoordinateState.OK;
         if (rrec.rtkMethod.contains("LHN95")) {
             vrecSrc.coordinateState = VrecSrc.CoordinateState.InvalidRTKNetwork;
-            String t[] = rrec.rtkMethod.split("_");
+            String[] t = rrec.rtkMethod.split("_");
             vrecSrc.rtkMethod = t[t.length - 1];
             return;
         }
@@ -211,7 +209,7 @@ class ProcessData {
         if (!((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) & (vrecSrc.northing < N_DEC7_LIMIT)) &&
                 !((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) & (vrecSrc.northing > N_DEC7_LIMIT))) {
             vrecSrc.coordinateState = VrecSrc.CoordinateState.MismatchbetweenCoordinateSystem;
-            String t[] = rrec.rtkMethod.split("_");
+            String[] t = rrec.rtkMethod.split("_");
             vrecSrc.rtkMethod = t[t.length - 1];
             t = rrec.userDefined.split("/");
             vrecSrc.coordSys = t[t.length - 1];
