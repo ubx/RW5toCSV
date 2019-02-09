@@ -178,6 +178,22 @@ class RA5toCSVTest {
         getaVoid(Issue12_2_LOG, Issue12_2_REF_LOG);
     }
 
+    @Test
+    void issue17_Test() throws IOException {
+        deleteQuietly(new File(Issue12_2_LOG));
+        deleteQuietly(new File(Issue12_2_CSV));
+        RW5toCSV.main(new String[]{"-r", Issue12_2_RW5, "-l", Issue12_2_LOG, "-c", Issue12_2_CSV, "-nl", "0.04", "-el", "0.04", "-elel", "0.06"});
+        getaVoid(Issue12_2_LOG, Issue12_2_REF_LOG);
+    }
+
+    @Test
+    void issue17_2_Test() throws IOException {
+        deleteQuietly(new File(Issue12_2_LOG));
+        deleteQuietly(new File(Issue12_2_CSV));
+        RW5toCSV.main(new String[]{"-r", Issue12_2_RW5, "-l", Issue12_2_LOG, "-c", Issue12_2_CSV, "-nl", "0.03", "-el", "0.03", "-elel", "0.05"});
+        getaVoid(Issue12_2_LOG, Issue12_2_REF_LOG);
+    }
+
 
     private void getaVoid(String file, String file2) throws IOException {
         assertTrue(contentEquals(new File(file), new File(file2)), DIFF_CMD + file + " " + file2 + THE_FILES_DIFFER);

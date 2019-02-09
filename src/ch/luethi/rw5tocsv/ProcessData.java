@@ -6,13 +6,14 @@ import java.util.List;
 
 class ProcessData {
 
+    protected static double norhingLim = RW5toCSV.DEFAULT_NORHING_LIM;
+    protected static double eastingLim = RW5toCSV.DEFAULT_EASTING_LIM;
+    protected static double elevationLim = RW5toCSV.DEFAULT_ELEVATION_LIM;
+
     private static final DecimalFormat form3 = new DecimalFormat("0.000");
     private static final String SEP = ",";
     private static final double HSDV_LIM = 0.04;
     private static final double VSDV_LIM = 0.06;
-    private static final double NORHING_LIM = 0.04;
-    private static final double EASTING_LIM = 0.04;
-    private static final double ELEVATION_LIM = 0.06;
     private static final double POINT_LIM = 0.5;
     private static final double N_DEC7_LIMIT = 1000000.0;
     private static List<Vrec> vRecs = null;
@@ -148,9 +149,9 @@ class ProcessData {
         for (VrecSrc vrecSrc : vrec.vrecSrcs) {
             if (vrecSrcLast != null) {
                 if (vrecSrc.state == VrecSrc.State.Valid || isXSDVnotInRange(vrecSrc)) {
-                    vrecSrc.driftExceedsLimitY = Math.abs(vrecSrcLast.northing - vrecSrc.northing) > NORHING_LIM;
-                    vrecSrc.driftExceedsLimitX = Math.abs(vrecSrcLast.easting - vrecSrc.easting) > EASTING_LIM;
-                    vrecSrc.driftExceedsLimitZ = Math.abs(vrecSrcLast.elevation - vrecSrc.elevation) > ELEVATION_LIM;
+                    vrecSrc.driftExceedsLimitY = Math.abs(vrecSrcLast.northing - vrecSrc.northing) > norhingLim;
+                    vrecSrc.driftExceedsLimitX = Math.abs(vrecSrcLast.easting - vrecSrc.easting) > eastingLim;
+                    vrecSrc.driftExceedsLimitZ = Math.abs(vrecSrcLast.elevation - vrecSrc.elevation) > elevationLim;
                     if (vrecSrc.driftExceedsLimitY | vrecSrc.driftExceedsLimitX | vrecSrc.driftExceedsLimitZ) {
                         vrecSrc.state = VrecSrc.State.DriftExceedsLimits;
                     }

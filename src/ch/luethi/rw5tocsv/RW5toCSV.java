@@ -14,6 +14,14 @@ class RW5toCSV {
     private static final String CSV = "c";
     private static final String LOG = "l";
     private static final String VER = "v";
+    private static final String DEF = "d";
+    private static final String NLIM = "nl";
+    private static final String ELIM = "el";
+    private static final String ELELIM = "elel";
+
+    protected static final double DEFAULT_NORHING_LIM = 0.04;
+    protected static final double DEFAULT_EASTING_LIM = 0.04;
+    protected static final double DEFAULT_ELEVATION_LIM = 0.06;
 
     private static String rw5FileName, csvFileName, logFileName;
 
@@ -25,6 +33,10 @@ class RW5toCSV {
         options.addOption(CSV, "CSV output file", true, "csv file to write data, optional. If not specified the output is <file-name>.csv in the same directory as the input file");
         options.addOption(LOG, "LOG output file", true, "log file to write comments, optional. If not specified the output is <file-name>.log in the same directory as the input file");
         options.addOption(VER, "version of the program", false, "prints the version number of the program");
+        options.addOption(DEF, "default limits", false, "prints the default values of configurable limits");
+        options.addOption(NLIM, "norhing limit", true, "norhing limit");
+        options.addOption(ELIM, "easting limit", true, "easting limit");
+        options.addOption(ELELIM, "elevation limit", true, "erlrvation limit");
 
         CommandLine cmd;
 
@@ -37,22 +49,36 @@ class RW5toCSV {
             if (cmd.hasOption(VER)) {
                 System.out.println("version " + Version.version);
                 exit(1);
+            } else if (cmd.hasOption(DEF)) {
+                System.out.println("default norhing limit: " + DEFAULT_NORHING_LIM);
+                System.out.println("default easting limit: " + DEFAULT_EASTING_LIM);
+                System.out.println("default elevation limit: " + DEFAULT_ELEVATION_LIM);
+                exit(1);
             } else if (cmd.hasOption(CSV)) {
                 csvFileName = cmd.getOptionValue(CSV);
             } else {
-                csvFileName = null;
                 csvFileName = getFullPathWithBaseName() + ".csv";
             }
             if (cmd.hasOption(LOG)) {
                 logFileName = cmd.getOptionValue(LOG);
             } else {
-                logFileName = null;
                 logFileName = getFullPathWithBaseName() + ".log";
+            }
+            if (cmd.hasOption(NLIM)) {
+                ProcessData.norhingLim = Double.valueOf(cmd.getOptionValue(NLIM));
+            }
+            if (cmd.hasOption(ELIM)) {
+                ProcessData.eastingLim = Double.valueOf(cmd.getOptionValue(ELIM));
+            }
+            if (cmd.hasOption(ELELIM)) {
+                ProcessData.elevationLim = Float.valueOf(cmd.getOptionValue(ELELIM));
             }
             if (rw5FileName == null) throw new ParseException("now arguments specified");
         } catch (ParseException e) {
             formatter.printHelp("java -jar RW5toCSV.jar args", options);
             exit(1);
+        } catch (NumberFormatException e) {
+            formatter.printHelp(e.getMessage(), options); // todo -- be mor specific !
         }
 
         List<Rrec> rrecs = RW5Parser.getRrecs(rw5FileName);
