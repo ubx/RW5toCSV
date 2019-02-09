@@ -18,6 +18,8 @@ class RW5toCSV {
     private static final String NLIM = "nl";
     private static final String ELIM = "el";
     private static final String ELELIM = "elel";
+    private static final String EXC = "ec";
+
 
     protected static final double DEFAULT_NORHING_LIM = 0.04;
     protected static final double DEFAULT_EASTING_LIM = 0.04;
@@ -37,6 +39,7 @@ class RW5toCSV {
         options.addOption(NLIM, "norhing limit", true, "norhing limit");
         options.addOption(ELIM, "easting limit", true, "easting limit");
         options.addOption(ELELIM, "elevation limit", true, "erlrvation limit");
+        options.addOption(EXC, "extra comment", false, "output extra comment in log file");
 
         CommandLine cmd;
 
@@ -72,6 +75,9 @@ class RW5toCSV {
             }
             if (cmd.hasOption(ELELIM)) {
                 ProcessData.elevationLim = Float.valueOf(cmd.getOptionValue(ELELIM));
+            }
+            if (cmd.hasOption(EXC)) {
+                ProcessData.extraComment = true;
             }
             if (rw5FileName == null) throw new ParseException("now arguments specified");
         } catch (ParseException e) {

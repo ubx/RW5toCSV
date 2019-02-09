@@ -9,6 +9,7 @@ class ProcessData {
     protected static double norhingLim = RW5toCSV.DEFAULT_NORHING_LIM;
     protected static double eastingLim = RW5toCSV.DEFAULT_EASTING_LIM;
     protected static double elevationLim = RW5toCSV.DEFAULT_ELEVATION_LIM;
+    protected static boolean extraComment = false;
 
     private static final DecimalFormat form3 = new DecimalFormat("0.000");
     private static final String SEP = ",";
@@ -68,15 +69,18 @@ class ProcessData {
             StringBuffer sb = new StringBuffer();
             sb.append(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
-                    + " - #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
+                    + "  -  #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
                     + " / " + vrec.date + " " + vrec.time + getErrorText2(vrec) + getSrcPNs(vrec));
-            for (VrecSrc vrecSrc : vrec.vrecSrcs) {
-                sb.append("\n "+vrecSrc.rrec.gs);
+            if (extraComment) {
+                for (VrecSrc vrecSrc : vrec.vrecSrcs) {
+                    sb.append("\n " + vrecSrc.rrec.gs);
+                }
             }
             csvRecs.add(sb.toString());
         }
         return csvRecs;
     }
+
     private static String getGCP(int cnt) {
         return String.format("%s%02d", "GCP", cnt);
     }
