@@ -65,14 +65,18 @@ class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
-            csvRecs.add(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
+            StringBuffer sb = new StringBuffer();
+            sb.append(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
-                    + "  -  #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
+                    + " - #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
                     + " / " + vrec.date + " " + vrec.time + getErrorText2(vrec) + getSrcPNs(vrec));
+            for (VrecSrc vrecSrc : vrec.vrecSrcs) {
+                sb.append("\n "+vrecSrc.rrec.gs);
+            }
+            csvRecs.add(sb.toString());
         }
         return csvRecs;
     }
-
     private static String getGCP(int cnt) {
         return String.format("%s%02d", "GCP", cnt);
     }
@@ -110,6 +114,7 @@ class ProcessData {
 
     private static VrecSrc getLastVrec(Rrec rrec) {
         VrecSrc vrecSrc = new VrecSrc();
+        vrecSrc.rrec = rrec;
         String[] strs = rrec.gs.split(",");
         // --GS,PN1,N 1200261.6916,E 2608973.7195,EL583.6008,--
         try {

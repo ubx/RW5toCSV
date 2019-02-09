@@ -74,4 +74,5 @@ public class VrecSrc {
     boolean coord6dec;
     String rtkMethod;
     String coordSys;
+    Rrec rrec;
 }
