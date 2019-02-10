@@ -41,6 +41,12 @@ class RW5toCSV {
         options.addOption(ELELIM, "elevation limit", true, "erlrvation limit");
         options.addOption(EXC, "extra comment", false, "output extra comment in log file");
 
+        ProcessData.extraComment = false;
+        ProcessData.norhingLim = DEFAULT_NORHING_LIM;
+        ProcessData.eastingLim = DEFAULT_EASTING_LIM;
+        ProcessData.elevationLim = DEFAULT_ELEVATION_LIM;
+
+
         CommandLine cmd;
 
         HelpFormatter formatter = new HelpFormatter();

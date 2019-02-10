@@ -24,14 +24,7 @@ class ProcessData {
         for (Rrec rrec : rRecs) {
             VrecSrc vrecSrc = getLastVrec(rrec);
             checkCoordinate(vrecSrc, rrec);
-            if ((vrecSrc.state == VrecSrc.State.Valid) || isXSDVnotInRange(vrecSrc)) {
-                addVrec(vRecs, vrecSrc);
-            } else {
-                Vrec vrecNew = new Vrec();
-                vrecNew.vrecSrcs.add(vrecSrc);
-                vrecNew.state = vrecSrc.state;
-                vRecs.add(vrecNew);
-            }
+            addVrec(vRecs, vrecSrc);
         }
 
         List<String> csvRecs = new ArrayList<>();
@@ -47,20 +40,28 @@ class ProcessData {
     }
 
     private static void addVrec(List<Vrec> vRecs, VrecSrc vrecSrcNew) {
-        boolean nf = false;
-        for (Vrec vrec : vRecs) {
-            for (VrecSrc vrecSrc : vrec.vrecSrcs) {
-                if ((distance(vrecSrc, vrecSrcNew) < POINT_LIM)) {
-                    vrec.vrecSrcs.add(vrecSrcNew);
-                    nf = true;
-                    break;
+        if ((vrecSrcNew.state == VrecSrc.State.Valid) || isXSDVnotInRange(vrecSrcNew)) {
+            boolean nf = false;
+            for (Vrec vrec : vRecs) {
+                for (VrecSrc vrecSrc : vrec.vrecSrcs) {
+                    if ((distance(vrecSrc, vrecSrcNew) < POINT_LIM)) {
+                        vrec.vrecSrcs.add(vrecSrcNew);
+                        nf = true;
+                        break;
+                    }
                 }
+                if (nf) break;
             }
-            if (nf) break;
-        }
-        if (!nf) {
+            if (!nf) {
+                Vrec vrecNew = new Vrec();
+                vrecNew.vrecSrcs.add(vrecSrcNew);
+                vRecs.add(vrecNew);
+            }
+
+        } else {
             Vrec vrecNew = new Vrec();
             vrecNew.vrecSrcs.add(vrecSrcNew);
+            vrecNew.state = vrecSrcNew.state;
             vRecs.add(vrecNew);
         }
     }
@@ -71,7 +72,7 @@ class ProcessData {
         int cnt = 1;
         for (Vrec vrec : vRecs) {
             boolean error = isError(vrec);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(getGCP(cnt++) + SEP + f3(vrec.easting, error) + SEP + f3(vrec.northing, error) + SEP + f3(vrec.elevation, error)
                     + SEP + f3(vrec.hsdv) + SEP + f3(vrec.vsdv)
                     + "  -  #" + vrec.getNumberOfMeasurements() + " / SATS: " + String.format("%02d-%02d", vrec.satsMin, vrec.satsMax)
@@ -205,6 +206,8 @@ class ProcessData {
             vrec.satsMax = Math.max(vrec.satsMax, vr.sats);
             vrec.hsdv = Math.max(vrec.hsdv, vr.hsdv);
             vrec.vsdv = Math.max(vrec.vsdv, vr.vsdv);
+            vrec.coordinateState = vr.coordinateState;
+            vrec.coord6dec = vrec.coord6dec | vr.coord6dec;
         }
         vrec.easting /= vrec.getNumberOfMeasurements();
         vrec.northing /= vrec.getNumberOfMeasurements();
