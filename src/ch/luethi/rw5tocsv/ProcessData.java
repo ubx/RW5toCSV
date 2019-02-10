@@ -223,15 +223,16 @@ class ProcessData {
 
         if (rrec.userDefined.length() == 0) return; // if no userDefined found!
 
-        if (!((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903")) & (vrecSrc.northing < N_DEC7_LIMIT)) &&
-                !((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) & (vrecSrc.northing > N_DEC7_LIMIT))) {
-            vrecSrc.coordinateState = VrecSrc.CoordinateState.MismatchbetweenCoordinateSystem;
-            String[] t = rrec.rtkMethod.split("_");
-            vrecSrc.rtkMethod = t[t.length - 1];
-            t = rrec.userDefined.split("/");
-            vrecSrc.coordSys = t[t.length - 1];
-            vrecSrc.coord6dec = vrecSrc.northing < N_DEC7_LIMIT;
+        if ((rrec.rtkMethod.contains("GISGEO_LV03LN02") & rrec.userDefined.contains("CH1903") & (vrecSrc.northing < N_DEC7_LIMIT))
+                || ((rrec.rtkMethod.contains("GISGEO_LV95LN02") & rrec.userDefined.contains("CH1903+")) & (vrecSrc.northing > N_DEC7_LIMIT))) {
+            return;
         }
+        vrecSrc.coordinateState = VrecSrc.CoordinateState.MismatchbetweenCoordinateSystem;
+        String[] t = rrec.rtkMethod.split("_");
+        vrecSrc.rtkMethod = t[t.length - 1];
+        t = rrec.userDefined.split("/");
+        vrecSrc.coordSys = t[t.length - 1];
+        vrecSrc.coord6dec = vrecSrc.northing < N_DEC7_LIMIT;
     }
 
     private static String getErrorText(Vrec vrec) {
