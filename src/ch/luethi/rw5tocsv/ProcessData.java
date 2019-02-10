@@ -26,6 +26,11 @@ class ProcessData {
             checkCoordinate(vrecSrc, rrec);
             if ((vrecSrc.state == VrecSrc.State.Valid) || isXSDVnotInRange(vrecSrc)) {
                 addVrec(vRecs, vrecSrc);
+            } else {
+                Vrec vrecNew = new Vrec();
+                vrecNew.vrecSrcs.add(vrecSrc);
+                vrecNew.state = vrecSrc.state;
+                vRecs.add(vrecNew);
             }
         }
 
@@ -91,7 +96,7 @@ class ProcessData {
                 return true;
             }
         }
-        vrec.state = VrecSrc.State.Valid;
+        //vrec.state = VrecSrc.State.Valid;
         return false;
     }
 
@@ -183,7 +188,9 @@ class ProcessData {
         vrec.driftExceedsLimitX = false;
         vrec.driftExceedsLimitZ = false;
         vrec.driftExceedsLimitY = false;
-        vrec.state = Vrec.State.Valid;
+        if (vrec.state == null) {
+            vrec.state = Vrec.State.Valid;
+        }
         vrec.coord6dec = false;
         vrec.rtkMethod = vrec.vrecSrcs.get(0).rtkMethod;
         vrec.coordSys = vrec.vrecSrcs.get(0).coordSys;
